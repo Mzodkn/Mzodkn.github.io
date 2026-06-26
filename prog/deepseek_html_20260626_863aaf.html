@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Programming Fundamentals · C++ Course</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <style>
+        /* ── Reset & Base ── */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0B0F19;
+            --bg-surface: #121826;
+            --bg-card: #161C2E;
+            --bg-elevated: #1E2640;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --text-white: #FFFFFF;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --accent: #3B82F6;
+            --accent-glow: rgba(59, 130, 246, 0.25);
+            --accent-purple: #8B5CF6;
+            --accent-teal: #14B8A6;
+            --gradient-accent: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            --radius: 12px;
+            --radius-lg: 20px;
+            --font: 'Inter', system-ui, -apple-system, sans-serif;
+            --transition: 0.25s ease;
+        }
+
+        /* RTL adjustments */
+        html[dir="rtl"] {
+            --font: 'Inter', 'Segoe UI', 'Tahoma', system-ui, -apple-system, sans-serif;
+        }
+        html[dir="rtl"] .nav-links {
+            flex-direction: row-reverse;
+        }
+        html[dir="rtl"] .list-dot li {
+            padding-left: 0;
+            padding-right: 1.5rem;
+        }
+        html[dir="rtl"] .list-dot li::before {
+            left: auto;
+            right: 0;
+        }
+        html[dir="rtl"] .accordion-header .icon {
+            transform: rotate(180deg);
+        }
+        html[dir="rtl"] .accordion.active .accordion-header .icon {
+            transform: rotate(0deg);
+        }
+        html[dir="rtl"] .card-accent {
+            border-left: none;
+            border-right: 3px solid var(--accent);
+        }
+        html[dir="rtl"] .card-accent-purple {
+            border-left: none;
+            border-right: 3px solid var(--accent-purple);
+        }
+        html[dir="rtl"] .card-accent-teal {
+            border-left: none;
+            border-right: 3px solid var(--accent-teal);
+        }
+        html[dir="rtl"] .badge-lecture {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 0 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        /* ── Typography ── */
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-white);
+        }
+
+        h1 {
+            font-size: clamp(2.4rem, 6vw, 4.2rem);
+            line-height: 1.1;
+        }
+        h2 {
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        h2 .badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: var(--accent);
+            color: #fff;
+            padding: 0.2rem 0.8rem;
+            border-radius: 100px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+        h3 {
+            font-size: clamp(1.15rem, 2vw, 1.5rem);
+            margin-bottom: 0.75rem;
+        }
+        h4 {
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        p,
+        li,
+        .text-body {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+        a:hover {
+            color: var(--accent-purple);
+        }
+
+        .text-gradient {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Layout Helpers ── */
+        .section {
+            padding: 4rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .section:last-of-type {
+            border-bottom: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr 1fr;
+            }
+            .grid-3 {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            transition: border-color var(--transition), transform 0.2s;
+        }
+        .card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .card-glass {
+            background: rgba(22, 28, 46, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .card-accent {
+            border-left: 3px solid var(--accent);
+        }
+        .card-accent-purple {
+            border-left: 3px solid var(--accent-purple);
+        }
+        .card-accent-teal {
+            border-left: 3px solid var(--accent-teal);
+        }
+
+        /* ── Tables ── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 1.25rem 0;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-subtle);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 400px;
+        }
+        th {
+            background: var(--bg-elevated);
+            color: var(--text-white);
+            font-weight: 600;
+            text-align: left;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        html[dir="rtl"] th,
+        html[dir="rtl"] td {
+            text-align: right;
+        }
+
+        /* ── Code / Inline ── */
+        .code-inline {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 0.15rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .code-block {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+            margin: 1rem 0;
+            tab-size: 2;
+            direction: ltr;
+            text-align: left;
+        }
+        .code-block .comment {
+            color: #64748B;
+            font-style: italic;
+        }
+        .code-block .keyword {
+            color: #818CF8;
+        }
+        .code-block .string {
+            color: #34D399;
+        }
+        .code-block .func {
+            color: #60A5FA;
+        }
+        .code-block .num {
+            color: #F472B6;
+        }
+
+        /* ── Accordion ── */
+        .accordion {
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+        .accordion-header {
+            background: var(--bg-card);
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-white);
+            transition: background var(--transition);
+            user-select: none;
+        }
+        .accordion-header:hover {
+            background: var(--bg-elevated);
+        }
+        .accordion-header .icon {
+            font-size: 1.25rem;
+            transition: transform 0.3s;
+            color: var(--text-muted);
+        }
+        .accordion.active .accordion-header .icon {
+            transform: rotate(180deg);
+        }
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+            background: var(--bg-primary);
+            padding: 0 1.5rem;
+        }
+        .accordion.active .accordion-body {
+            max-height: 2000px;
+            padding: 1.5rem;
+        }
+        .accordion-body p,
+        .accordion-body li {
+            color: var(--text-secondary);
+        }
+        .accordion-body ul,
+        .accordion-body ol {
+            padding-left: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        .accordion-body li {
+            margin-bottom: 0.25rem;
+        }
+        html[dir="rtl"] .accordion-body ul,
+        html[dir="rtl"] .accordion-body ol {
+            padding-left: 0;
+            padding-right: 1.5rem;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 5rem 0 3rem;
+            text-align: center;
+            position: relative;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.3;
+        }
+        .hero .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 640px;
+            margin: 1rem auto 0;
+        }
+        .hero .meta {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem 2.5rem;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .hero .meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .hero .meta .dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-right: 0.3rem;
+        }
+
+        /* ── Marks Banner ── */
+        .marks-banner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem 2rem;
+            margin: 1.5rem 0;
+        }
+        .marks-banner .item {
+            text-align: center;
+        }
+        .marks-banner .item .num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-white);
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .marks-banner .item .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Tags / Chips ── */
+        .chip {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.15rem 0.7rem;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        .chip-purple {
+            background: rgba(139, 92, 246, 0.12);
+            color: var(--accent-purple);
+            border-color: rgba(139, 92, 246, 0.15);
+        }
+        .chip-teal {
+            background: rgba(20, 184, 166, 0.12);
+            color: var(--accent-teal);
+            border-color: rgba(20, 184, 166, 0.15);
+        }
+
+        /* ── List styling ── */
+        .list-dot {
+            list-style: none;
+            padding: 0;
+        }
+        .list-dot li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.4rem;
+            color: var(--text-secondary);
+        }
+        .list-dot li::before {
+            content: '◆';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 0.55rem;
+            top: 0.35rem;
+        }
+        html[dir="rtl"] .list-dot li {
+            padding-left: 0;
+            padding-right: 1.5rem;
+        }
+        html[dir="rtl"] .list-dot li::before {
+            left: auto;
+            right: 0;
+        }
+
+        /* ── Nav ── */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 15, 25, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.75rem 0;
+        }
+        .nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .nav .logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text-white);
+            letter-spacing: -0.02em;
+        }
+        .nav .logo span {
+            color: var(--accent);
+        }
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1.25rem;
+            font-size: 0.85rem;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            transition: color var(--transition);
+            font-weight: 500;
+        }
+        .nav-links a:hover {
+            color: var(--text-white);
+        }
+
+        /* Language toggle */
+        .lang-toggle {
+            display: flex;
+            gap: 0.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            padding: 0.2rem;
+        }
+        .lang-toggle button {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.25rem 0.7rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .lang-toggle button.active {
+            background: var(--accent);
+            color: #fff;
+        }
+        .lang-toggle button:hover:not(.active) {
+            color: var(--text-white);
+        }
+
+        /* ── Responsive tweaks ── */
+        @media (max-width: 640px) {
+            .hero {
+                padding: 3rem 0 2rem;
+            }
+            .section {
+                padding: 2.5rem 0;
+            }
+            .card {
+                padding: 1.25rem;
+            }
+            .marks-banner {
+                gap: 1rem 2rem;
+                padding: 1.25rem;
+            }
+            .marks-banner .item .num {
+                font-size: 1.5rem;
+            }
+            .nav .container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+            .nav-links {
+                justify-content: center;
+                gap: 0.35rem 0.9rem;
+                font-size: 0.75rem;
+            }
+            .code-block {
+                font-size: 0.75rem;
+                padding: 1rem;
+            }
+            .table-wrap table {
+                font-size: 0.8rem;
+                min-width: 300px;
+            }
+            th,
+            td {
+                padding: 0.5rem 0.7rem;
+            }
+            .lang-toggle {
+                align-self: center;
+            }
+        }
+
+        /* ── Misc ── */
+        .mt-1 {
+            margin-top: 1rem;
+        }
+        .mt-2 {
+            margin-top: 2rem;
+        }
+        .mb-1 {
+            margin-bottom: 1rem;
+        }
+        .gap-1 {
+            gap: 1rem;
+        }
+        .flex-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 0.75rem;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .inline-icon {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .badge-lecture {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+            padding: 0.1rem 0.6rem;
+            border-radius: 100px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .footnote {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .op-symbol {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-white);
+            font-weight: 600;
+        }
+
+        /* hide elements for i18n swap */
+        [data-i18n] {
+            transition: opacity 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAV ===== -->
+    <nav class="nav">
+        <div class="container">
+            <div class="logo">⚡ <span>Prog</span>Fundamentals</div>
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div class="nav-links">
+                    <a href="#objectives" data-i18n="nav_objectives">Objectives</a>
+                    <a href="#references" data-i18n="nav_references">References</a>
+                    <a href="#marks" data-i18n="nav_marks">Marks</a>
+                    <a href="#components" data-i18n="nav_components">Components</a>
+                    <a href="#languages" data-i18n="nav_languages">Languages</a>
+                    <a href="#cpp" data-i18n="nav_cpp">C++</a>
+                    <a href="#datatypes" data-i18n="nav_datatypes">Data Types</a>
+                    <a href="#operators" data-i18n="nav_operators">Operators</a>
+                    <a href="#control" data-i18n="nav_control">Control</a>
+                    <a href="#functions" data-i18n="nav_functions">Functions</a>
+                </div>
+                <div class="lang-toggle" id="langToggle">
+                    <button class="active" data-lang="en">EN</button>
+                    <button data-lang="ar">عربي</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero container">
+        <div class="chip" style="margin-bottom:1rem;" data-i18n="hero_chip">Lecture Series · 2026</div>
+        <h1><span data-i18n="hero_title_part1">Programming</span> <span class="text-gradient" data-i18n="hero_title_part2">Fundamentals</span></h1>
+        <p class="subtitle" data-i18n="hero_subtitle">
+            A comprehensive introduction to computer programming with C++ — from machine language to modern software development.
+        </p>
+        <div class="meta">
+            <span><span class="dot"></span> <span data-i18n="hero_meta_lectures">8 Lectures</span></span>
+            <span><span class="dot"></span> <span data-i18n="hero_meta_cpp">C++ · Deitel &amp; Malik</span></span>
+            <span><span class="dot"></span> <span data-i18n="hero_meta_coverage">100% PDF coverage</span></span>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- ===== OBJECTIVES ===== -->
+        <section id="objectives" class="section">
+            <h2><span data-i18n="objectives_heading">Course</span> <span class="text-gradient" data-i18n="objectives_heading_grad">Objectives</span> <span class="badge" data-i18n="objectives_badge">Core</span></h2>
+            <div class="grid-2">
+                <div class="card card-accent">
+                    <div class="flex-center"><span class="inline-icon">🧠</span> <h4 style="margin:0;" data-i18n="obj1_title">Conceptual foundation</h4></div>
+                    <p data-i18n="obj1_desc">To provide students with a general idea about computer programming and its core principles.</p>
+                </div>
+                <div class="card card-accent-purple">
+                    <div class="flex-center"><span class="inline-icon">📜</span> <h4 style="margin:0;" data-i18n="obj2_title">Language evolution</h4></div>
+                    <p data-i18n="obj2_desc">To give a background about programming languages evolution — from 1GL to modern high-level languages.</p>
+                </div>
+                <div class="card card-accent-teal" style="grid-column: 1 / -1;">
+                    <div class="flex-center"><span class="inline-icon">💻</span> <h4 style="margin:0;" data-i18n="obj3_title">Hands-on C++</h4></div>
+                    <p data-i18n="obj3_desc">To introduce the C++ programming language and explain how practically it can be used (computer lab).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== REFERENCES ===== -->
+        <section id="references" class="section">
+            <h2><span data-i18n="ref_heading">References</span> <span class="badge" data-i18n="ref_badge">Reading</span></h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>📘 <span data-i18n="ref1_title">C++ How to Program</span></h4>
+                    <p><span data-i18n="ref1_edition">8<sup>th</sup> edition</span>, <strong data-i18n="ref1_author">Paul Deitel</strong></p>
+                </div>
+                <div class="card">
+                    <h4>📗 <span data-i18n="ref2_title">C++ Programming: From Problem Analysis to Program Design</span></h4>
+                    <p><span data-i18n="ref2_edition">5<sup>th</sup> Edition</span>, <strong data-i18n="ref2_author">D.S. Malik</strong></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== MARKS ===== -->
+        <section id="marks" class="section">
+            <h2><span data-i18n="marks_heading">Assessment</span> <span class="text-gradient" data-i18n="marks_heading_grad">Breakdown</span> <span class="badge" data-i18n="marks_badge">100 Marks</span></h2>
+            <div class="marks-banner">
+                <div class="item"><span class="num">40</span><div class="label" data-i18n="marks_coursework">Coursework</div></div>
+                <div class="item"><span class="num">20</span><div class="label" data-i18n="marks_midterm">Midterm</div></div>
+                <div class="item"><span class="num">40</span><div class="label" data-i18n="marks_final">Final</div></div>
+            </div>
+        </section>
+
+        <!-- ===== COMPONENTS ===== -->
+        <section id="components" class="section">
+            <h2><span data-i18n="components_heading">Components of the</span> <span class="text-gradient" data-i18n="components_heading_grad">Computer System</span></h2>
+            <div class="grid-2">
+                <div class="card card-accent">
+                    <h3>🖥️ <span data-i18n="comp_hardware_title">Hardware</span></h3>
+                    <p data-i18n="comp_hardware_desc">The physical equipment that make up a computer system. Major hardware components include:</p>
+                    <ul class="list-dot mt-1">
+                        <li data-i18n="comp_hw1">Central Processing Unit (CPU)</li>
+                        <li data-i18n="comp_hw2">Main Memory (MM) — also called Random Access Memory (RAM)</li>
+                        <li data-i18n="comp_hw3">Input / Output devices</li>
+                        <li data-i18n="comp_hw4">Secondary storage</li>
+                    </ul>
+                </div>
+                <div class="card card-accent-purple">
+                    <h3>📦 <span data-i18n="comp_sw_title">Software</span></h3>
+                    <p data-i18n="comp_sw_desc">Programs written to perform specific tasks. All software is written in programming languages.</p>
+                    <div style="margin-top:0.75rem;">
+                        <span class="chip" data-i18n="comp_sw_system">System Programs</span>
+                        <span class="chip chip-purple" data-i18n="comp_sw_app">Application Programs</span>
+                    </div>
+                    <ul class="list-dot mt-1">
+                        <li data-i18n="comp_sw1"><strong>System programs</strong> — control the computer. The operating system loads first; without it, the computer is useless.</li>
+                        <li data-i18n="comp_sw2"><strong>Application programs</strong> — perform specific tasks (word processors, spreadsheets, games). The OS runs application programs.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PROGRAMMING LANGUAGES ===== -->
+        <section id="languages" class="section">
+            <h2><span data-i18n="lang_heading">Programming</span> <span class="text-gradient" data-i18n="lang_heading_grad">Languages</span></h2>
+            <p style="margin-bottom:1.5rem;" data-i18n="lang_intro">A collection of instructions, symbols and rules used to write a program (code) to perform a specific job.</p>
+
+            <div class="grid-3">
+                <div class="card">
+                    <h3><span data-i18n="lang_1gl_title">1GL · Machine</span></h3>
+                    <span class="chip" data-i18n="lang_1gl_chip">Lowest level</span>
+                    <p class="mt-1" data-i18n="lang_1gl_desc">The language used to program first-generation computers. Instructions are made of binary numbers (0s and 1s), corresponding to off/on states of electrical switches.</p>
+                    <p class="footnote" data-i18n="lang_1gl_footnote">Suitable for machines, very difficult for humans.</p>
+                </div>
+                <div class="card">
+                    <h3><span data-i18n="lang_2gl_title">2GL · Assembly</span></h3>
+                    <span class="chip chip-purple" data-i18n="lang_2gl_chip">Low-level</span>
+                    <p class="mt-1" data-i18n="lang_2gl_desc">Allows programmers to use abbreviations or easily remembered words instead of numbers. An <strong>assembler</strong> translates assembly into machine language.</p>
+                    <div class="code-block" style="font-size:0.8rem; margin-top:0.75rem;">
+                        LOAD X<br>MULT y<br>STOR z
+                    </div>
+                </div>
+                <div class="card">
+                    <h3><span data-i18n="lang_3gl_title">3GL · High-Level</span></h3>
+                    <span class="chip chip-teal" data-i18n="lang_3gl_chip">Closer to natural language</span>
+                    <p class="mt-1" data-i18n="lang_3gl_desc">Refinement of 2GL. Uses familiar notation rather than numbers or abbreviations. Most high-level languages are <strong>not machine dependent</strong>.</p>
+                    <p class="mt-1" data-i18n="lang_3gl_translators">Translators: <strong>Compiler</strong> or <strong>Interpreter</strong>.</p>
+                </div>
+            </div>
+
+            <!-- Assembly table -->
+            <div class="card mt-2">
+                <h4 data-i18n="lang_asm_table_title">Assembly ↔ Machine Language</h4>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th data-i18n="lang_asm_th1">Assembly Language</th><th data-i18n="lang_asm_th2">Machine Language</th></tr></thead>
+                        <tbody>
+                            <tr><td>LOAD</td><td>100100</td></tr>
+                            <tr><td>STOR</td><td>100010</td></tr>
+                            <tr><td>MULT</td><td>100110</td></tr>
+                            <tr><td>ADD</td><td>100101</td></tr>
+                            <tr><td>SUB</td><td>100011</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- High-level examples -->
+            <div class="card mt-1">
+                <h4 data-i18n="lang_hl_examples_title">Examples of High-Level Languages</h4>
+                <div class="flex-wrap">
+                    <span class="chip">FORTRAN</span>
+                    <span class="chip chip-purple">COBOL</span>
+                    <span class="chip chip-teal">BASIC</span>
+                    <span class="chip">C</span>
+                    <span class="chip chip-purple">C++</span>
+                    <span class="chip chip-teal">C#</span>
+                    <span class="chip">Java</span>
+                    <span class="chip chip-purple">Pascal</span>
+                </div>
+                <p class="footnote" data-i18n="lang_hl_footnote">Each language follows its own syntactic and semantic rules.</p>
+            </div>
+        </section>
+
+        <!-- ===== C++ INTRO ===== -->
+        <section id="cpp" class="section">
+            <h2><span data-i18n="cpp_heading">Introduction to</span> <span class="text-gradient" data-i18n="cpp_heading_grad">C++</span> <span class="badge" data-i18n="cpp_badge">Concepts</span></h2>
+
+            <div class="card">
+                <h3 data-i18n="cpp_programs_title">Computer Programs</h3>
+                <p data-i18n="cpp_programs_desc">Also known as <strong>"Code"</strong> — a collection of instructions that can be executed to perform a specific task.</p>
+                <h4 class="mt-1" data-i18n="cpp_components_title">Program / Code Components</h4>
+                <ul class="list-dot">
+                    <li data-i18n="cpp_comp1"><strong>Constants</strong> — fixed values/data in the program body. <span class="code-inline">const</span> cannot be reassigned.</li>
+                    <li data-i18n="cpp_comp2"><strong>Variables</strong> — changeable values/data in the program.</li>
+                    <li data-i18n="cpp_comp3"><strong>Methods</strong> — procedures/functions that perform certain tasks.</li>
+                </ul>
+            </div>
+
+            <div class="card mt-1">
+                <h4 data-i18n="cpp_structure_title">Program Structure Example</h4>
+                <div class="code-block">
+                    <span class="comment">// my first program in C++</span><br>
+                    <span class="keyword">#include</span> &lt;iostream.h&gt;<br><br>
+                    <span class="keyword">int</span> <span class="func">main</span> ()<br>
+                    {<br>
+                    &nbsp;&nbsp;cout &lt;&lt; <span class="string">"Hello World !"</span>;<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> 0;<br>
+                    }
+                </div>
+            </div>
+
+            <div class="card mt-1">
+                <h4 data-i18n="cpp_components_lang_title">C++ Language Components</h4>
+                <p data-i18n="cpp_components_lang_desc">A C++ program consists of statements; any statement consists of words; any word composes of a set of letters:</p>
+                <ul class="list-dot">
+                    <li data-i18n="cpp_lang1">Numbers: 0, 1, ..., 9</li>
+                    <li data-i18n="cpp_lang2">Alphabet: A–Z, a–z</li>
+                    <li data-i18n="cpp_lang3">Symbols, special characters, and mathematical operators: <span class="code-inline">( ) { } . ; / + -</span> and others</li>
+                </ul>
+                <p class="mt-1" data-i18n="cpp_lang_note">Words (names) in C++ can be built of alphabet, numbers, and underscore (<span class="code-inline">_</span>).</p>
+            </div>
+
+            <!-- Naming rules -->
+            <div class="card mt-1">
+                <h4 data-i18n="cpp_naming_title">Rules for C++ Names</h4>
+                <ol style="padding-left:1.5rem; color:var(--text-secondary);">
+                    <li data-i18n="cpp_naming1">A name must start with a letter or underscore.</li>
+                    <li data-i18n="cpp_naming2">A name cannot start with a number.</li>
+                    <li data-i18n="cpp_naming3">A name can only contain alpha-numeric characters and underscores (A–z, 0–9, _).</li>
+                </ol>
+                <div class="flex-wrap mt-1">
+                    <span class="chip" style="background:rgba(52,211,153,0.12); color:#34D399; border-color:rgba(52,211,153,0.2);" data-i18n="cpp_valid">✅ Valid: count, stud_name, age1, _pl</span>
+                    <span class="chip" style="background:rgba(244,63,94,0.12); color:#F43F5E; border-color:rgba(244,63,94,0.2);" data-i18n="cpp_invalid">❌ Invalid: cnt*, stud name, 1age</span>
+                </div>
+                <p class="mt-1" data-i18n="cpp_reserved"><strong>Reserved words (keywords)</strong> cannot be used as user-defined names: <span class="code-inline">class</span>, <span class="code-inline">main</span>, <span class="code-inline">public</span>, <span class="code-inline">void</span>, <span class="code-inline">static</span>, etc.</p>
+            </div>
+        </section>
+
+        <!-- ===== DATA TYPES ===== -->
+        <section id="datatypes" class="section">
+            <h2>C++ <span class="text-gradient" data-i18n="datatypes_heading_grad">Data Types</span></h2>
+            <p data-i18n="datatypes_intro">Variables can store data of different types. C++ supports the following data types:</p>
+
+            <div class="grid-2 mt-1">
+                <div class="card">
+                    <h4>Character <span class="code-inline">char</span></h4>
+                    <p data-i18n="datatypes_char_desc">Contains one character: <span class="code-inline">'a'</span>, <span class="code-inline">';'</span>, <span class="code-inline">'1'</span></p>
+                    <p class="footnote" data-i18n="datatypes_char_len">Length: 2 bytes</p>
+                    <div class="code-block" style="font-size:0.8rem;">
+                        <span class="keyword">char</span> Code;<br>
+                        <span class="keyword">char</span> Code = <span class="string">'S'</span>;
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>Integer <span class="code-inline">int</span></h4>
+                    <p data-i18n="datatypes_int_desc">Whole numbers: 1, 30, 100, ...</p>
+                    <div class="table-wrap" style="margin-top:0.5rem;">
+                        <table>
+                            <thead><tr><th data-i18n="datatypes_int_th1">Type</th><th data-i18n="datatypes_int_th2">Length (bytes)</th></tr></thead>
+                            <tbody>
+                                <tr><td>byte</td><td>1</td></tr>
+                                <tr><td>short</td><td>2</td></tr>
+                                <tr><td>int</td><td>4</td></tr>
+                                <tr><td>long</td><td>4</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="footnote" data-i18n="datatypes_int_note">An integer must have at least one digit, no decimal point, can be positive or negative.</p>
+                </div>
+                <div class="card">
+                    <h4>Real <span class="code-inline">float</span> / <span class="code-inline">double</span></h4>
+                    <p data-i18n="datatypes_real_desc">Floating-point numbers: 1.0, 30.25, 100.75</p>
+                    <div class="table-wrap" style="margin-top:0.5rem;">
+                        <table>
+                            <thead><tr><th data-i18n="datatypes_real_th1">Type</th><th data-i18n="datatypes_real_th2">Length (bytes)</th></tr></thead>
+                            <tbody>
+                                <tr><td>float</td><td>4</td></tr>
+                                <tr><td>double</td><td>8</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="footnote" data-i18n="datatypes_real_note">A real must have at least one digit, may have a decimal point, can be positive or negative.</p>
+                </div>
+                <div class="card">
+                    <h4>Boolean <span class="code-inline">bool</span></h4>
+                    <p data-i18n="datatypes_bool_desc">Contains one of two values: <span class="code-inline">true</span> or <span class="code-inline">false</span></p>
+                    <div class="code-block" style="font-size:0.8rem;">
+                        <span class="keyword">bool</span> single;<br>
+                        <span class="keyword">bool</span> single = <span class="keyword">true</span>;
+                    </div>
+                    <h4 class="mt-1">String <span class="code-inline">string</span></h4>
+                    <p data-i18n="datatypes_string_desc">Contains a set of characters: <span class="code-inline">"Sudan"</span>, <span class="code-inline">"Yes, welcome"</span></p>
+                    <div class="code-block" style="font-size:0.8rem;">
+                        <span class="keyword">string</span> name;<br>
+                        <span class="keyword">string</span> name = <span class="string">"Ahmed"</span>;
+                    </div>
+                </div>
+            </div>
+
+            <!-- Declaring variables & constants -->
+            <div class="card mt-1">
+                <h4 data-i18n="datatypes_decl_var_title">Declaring Variables</h4>
+                <div class="code-block">
+                    <span class="keyword">char</span> var;<br>
+                    <span class="keyword">int</span> var;<br>
+                    <span class="keyword">long</span> var;<br>
+                    <span class="keyword">short</span> var;<br>
+                    <span class="keyword">float</span> var;<br>
+                    <span class="keyword">bool</span> var;<br>
+                    <span class="keyword">string</span> var;
+                </div>
+                <h4 class="mt-1" data-i18n="datatypes_decl_const_title">Declaring Constants</h4>
+                <div class="code-block">
+                    <span class="keyword">const</span> <span class="keyword">char</span> var;<br>
+                    <span class="keyword">const</span> <span class="keyword">int</span> var;<br>
+                    <span class="keyword">const</span> <span class="keyword">long</span> var;<br>
+                    <span class="keyword">const</span> <span class="keyword">short</span> var;<br>
+                    <span class="keyword">const</span> <span class="keyword">float</span> var;<br>
+                    <span class="keyword">const</span> <span class="keyword">bool</span> var;<br>
+                    <span class="keyword">const</span> <span class="keyword">string</span> var;
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== OPERATORS ===== -->
+        <section id="operators" class="section">
+            <h2><span data-i18n="operators_heading">Operators in</span> <span class="text-gradient" data-i18n="operators_heading_grad">C++</span></h2>
+
+            <!-- Mathematical -->
+            <div class="card">
+                <h4 data-i18n="operators_math_title">Mathematical Operations</h4>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th data-i18n="operators_math_th1">Operator</th><th data-i18n="operators_math_th2">Name</th><th data-i18n="operators_math_th3">Example</th><th data-i18n="operators_math_th4">Result</th></tr></thead>
+                        <tbody>
+                            <tr><td class="op-symbol">+</td><td data-i18n="op_add">Addition</td><td>x + y</td><td data-i18n="op_add_res">Sum of x and y</td></tr>
+                            <tr><td class="op-symbol">−</td><td data-i18n="op_sub">Subtraction</td><td>x − y</td><td data-i18n="op_sub_res">Difference of x and y</td></tr>
+                            <tr><td class="op-symbol">*</td><td data-i18n="op_mul">Multiplication</td><td>x * y</td><td data-i18n="op_mul_res">Product of x and y</td></tr>
+                            <tr><td class="op-symbol">/</td><td data-i18n="op_div">Division</td><td>x / y</td><td data-i18n="op_div_res">Quotient of x and y</td></tr>
+                            <tr><td class="op-symbol">%</td><td data-i18n="op_mod">Modulus / remainder</td><td>x % y</td><td data-i18n="op_mod_res">Remainder when x divided by y</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Logical -->
+            <div class="card mt-1">
+                <h4 data-i18n="operators_logical_title">Logical Operations</h4>
+                <p class="footnote" data-i18n="operators_logical_note">Return Boolean value (true / false)</p>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th data-i18n="operators_logical_th1">Operator</th><th data-i18n="operators_logical_th2">Name</th><th data-i18n="operators_logical_th3">Example</th><th data-i18n="operators_logical_th4">Result</th></tr></thead>
+                        <tbody>
+                            <tr><td class="op-symbol">==</td><td data-i18n="op_eq">Equal</td><td>x == y</td><td data-i18n="op_eq_res">True if x is equal to y</td></tr>
+                            <tr><td class="op-symbol">!=</td><td data-i18n="op_neq">Not equal</td><td>x != y</td><td data-i18n="op_neq_res">True if x is not equal to y</td></tr>
+                            <tr><td class="op-symbol">&gt;</td><td data-i18n="op_gt">Greater than</td><td>x &gt; y</td><td data-i18n="op_gt_res">True if x is greater than y</td></tr>
+                            <tr><td class="op-symbol">&lt;</td><td data-i18n="op_lt">Less than</td><td>x &lt; y</td><td data-i18n="op_lt_res">True if x is less than y</td></tr>
+                            <tr><td class="op-symbol">&gt;=</td><td data-i18n="op_gte">Greater than or equal</td><td>x &gt;= y</td><td data-i18n="op_gte_res">True if x is greater than or equal to y</td></tr>
+                            <tr><td class="op-symbol">&lt;=</td><td data-i18n="op_lte">Less than or equal</td><td>x &lt;= y</td><td data-i18n="op_lte_res">True if x is less than or equal to y</td></tr>
+                            <tr><td class="op-symbol">&amp;&amp;</td><td data-i18n="op_and">And</td><td>x &amp;&amp; y</td><td data-i18n="op_and_res">True if both x and y are true</td></tr>
+                            <tr><td class="op-symbol">||</td><td data-i18n="op_or">Or</td><td>x || y</td><td data-i18n="op_or_res">True if either x or y is true</td></tr>
+                            <tr><td class="op-symbol">!</td><td data-i18n="op_not">Not</td><td>!x</td><td data-i18n="op_not_res">True if x is not true</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Assignment -->
+            <div class="card mt-1">
+                <h4 data-i18n="operators_assign_title">Assignment Operators</h4>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th data-i18n="operators_assign_th1">Assignment</th><th data-i18n="operators_assign_th2">Same as...</th><th data-i18n="operators_assign_th3">Description</th></tr></thead>
+                        <tbody>
+                            <tr><td class="op-symbol">X = y</td><td>X = y</td><td data-i18n="op_assign_desc1">Left operand gets value of expression on right</td></tr>
+                            <tr><td class="op-symbol">X += y</td><td>X = X + y</td><td data-i18n="op_assign_desc2">Addition then assign</td></tr>
+                            <tr><td class="op-symbol">X −= y</td><td>X = X − y</td><td data-i18n="op_assign_desc3">Subtraction then assign</td></tr>
+                            <tr><td class="op-symbol">X *= y</td><td>X = X * y</td><td data-i18n="op_assign_desc4">Multiplication then assign</td></tr>
+                            <tr><td class="op-symbol">X /= y</td><td>X = X / y</td><td data-i18n="op_assign_desc5">Division then assign</td></tr>
+                            <tr><td class="op-symbol">X %= y</td><td>X = X % y</td><td data-i18n="op_assign_desc6">Modulus then assign</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Unary -->
+            <div class="card mt-1">
+                <h4 data-i18n="operators_unary_title">Unary Operators</h4>
+                <p class="footnote" data-i18n="operators_unary_note">Operate on only one operand</p>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th data-i18n="operators_unary_th1">Operator</th><th data-i18n="operators_unary_th2">Name</th><th data-i18n="operators_unary_th3">Example</th><th data-i18n="operators_unary_th4">Description</th></tr></thead>
+                        <tbody>
+                            <tr><td rowspan="2" class="op-symbol">++</td><td data-i18n="op_preinc">Pre-increment</td><td>++X</td><td data-i18n="op_preinc_desc">Increments x by one, then returns x</td></tr>
+                            <tr><td data-i18n="op_postinc">Post-increment</td><td>X++</td><td data-i18n="op_postinc_desc">Returns x, then increments x by one</td></tr>
+                            <tr><td rowspan="2" class="op-symbol">−−</td><td data-i18n="op_predec">Pre-decrement</td><td>−−X</td><td data-i18n="op_predec_desc">Decrements x by one, then returns x</td></tr>
+                            <tr><td data-i18n="op_postdec">Post-decrement</td><td>X−−</td><td data-i18n="op_postdec_desc">Returns x, then decrements x by one</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== COMMENTS ===== -->
+        <section id="comments" class="section">
+            <h2><span data-i18n="comments_heading">Comments in</span> <span class="text-gradient" data-i18n="comments_heading_grad">C++</span></h2>
+            <div class="card">
+                <p data-i18n="comments_intro">A comment in C++ code is a line that is <strong>not read/executed</strong> as part of the program. Its only purpose is to be read by someone looking at the code.</p>
+                <ul class="list-dot mt-1">
+                    <li data-i18n="comments_use1">Let others understand what you are doing</li>
+                    <li data-i18n="comments_use2">Remind yourself of what you did — most programmers have experienced coming back to their own work a year or two later and having to re-figure out what they did.</li>
+                </ul>
+                <div class="code-block mt-1">
+                    <span class="comment">/*</span><br>
+                    <span class="comment">  Here is a block comment.</span><br>
+                    <span class="comment">*/</span><br><br>
+                    <span class="comment">/* Here is a single-line comment. */</span><br><br>
+                    cout &lt;&lt; <span class="string">"Hello"</span>; <span class="comment">// An end-of-line comment.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== STRUCTURE OF A C++ PROGRAM ===== -->
+        <section id="structure" class="section">
+            <h2><span data-i18n="structure_heading">Structure of a</span> <span class="text-gradient" data-i18n="structure_heading_grad">C++ Program</span></h2>
+            <div class="card">
+                <div class="code-block">
+                    <span class="comment">// my first program in C++</span><br>
+                    <span class="keyword">#include</span> &lt;iostream.h&gt;<br><br>
+                    <span class="keyword">int</span> <span class="func">main</span> ()<br>
+                    {<br>
+                    &nbsp;&nbsp;cout &lt;&lt; <span class="string">"Hello World !"</span>;<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> 0;<br>
+                    }
+                </div>
+                <ul class="list-dot mt-1">
+                    <li data-i18n="structure_comment"><strong>Comment line</strong> — <span class="code-inline">//</span> lines are ignored by the compiler.</li>
+                    <li data-i18n="structure_preprocessor"><strong>Preprocessor directive</strong> — <span class="code-inline">#include &lt;iostream&gt;</span> includes the input/output stream header.</li>
+                    <li data-i18n="structure_main"><strong>main function</strong> — the entry point of all C++ programs. Execution starts here.</li>
+                    <li data-i18n="structure_statement"><strong>Statement</strong> — <span class="code-inline">cout &lt;&lt; "Hello World !";</span> outputs text to the screen.</li>
+                </ul>
+                <div class="card mt-1" style="background:var(--bg-elevated);">
+                    <p data-i18n="structure_cout_intro"><span class="code-inline">cout</span> enables data (output) to be displayed on the screen.</p>
+                    <p data-i18n="structure_cout_syntax"><strong>Syntax:</strong> <span class="code-inline">cout &lt;&lt; variable_name</span></p>
+                    <p data-i18n="structure_cout_example">e.g. <span class="code-inline">cout &lt;&lt; age;</span> &nbsp; <span class="code-inline">cout &lt;&lt; "my age is:" &lt;&lt; age;</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CONTROL STATEMENTS ===== -->
+        <section id="control" class="section">
+            <h2><span data-i18n="control_heading">Control</span> <span class="text-gradient" data-i18n="control_heading_grad">Statements</span></h2>
+
+            <!-- Sequence -->
+            <div class="card">
+                <h4 data-i18n="control_seq_title">Sequence Statements</h4>
+                <p data-i18n="control_seq_desc">Statements can be executed in sequence — one right after the other, with no deviation from the specified sequence.</p>
+            </div>
+
+            <!-- Selection -->
+            <div class="card mt-1">
+                <h4 data-i18n="control_sel_title">Selection Statements</h4>
+                <p data-i18n="control_sel_desc">A selection statement chooses which statement to execute based on whether the expression is true or false.</p>
+                <div class="flex-wrap mt-1">
+                    <span class="chip">if</span>
+                    <span class="chip chip-purple">if...else</span>
+                    <span class="chip chip-teal">Nested if</span>
+                    <span class="chip">switch</span>
+                </div>
+
+                <div class="accordion mt-1">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_if_title">if Statement</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_if_syntax_title"><strong>Syntax:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">if</span> ( logicalExpression ) <span class="keyword">statement</span>;
+                        </div>
+                        <p data-i18n="accord_if_example_title"><strong>Example:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">if</span> (x &lt; 5)<br>
+                            &nbsp;&nbsp;cout &lt;&lt; <span class="string">"low value for x"</span>;
+                        </div>
+                        <p class="footnote" data-i18n="accord_if_note">Also known as <strong>single-selection statement</strong>. If the expression is true, the statement is executed; if false, nothing happens.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_ifelse_title">if...else Statement</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_ifelse_syntax_title"><strong>Syntax:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">if</span> (condition)<br>
+                            &nbsp;&nbsp;statement1;<br>
+                            <span class="keyword">else</span><br>
+                            &nbsp;&nbsp;statement2;
+                        </div>
+                        <p data-i18n="accord_ifelse_example_title"><strong>Example:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">if</span> (x &lt; 5)<br>
+                            &nbsp;&nbsp;cout &lt;&lt; <span class="string">"low x"</span>;<br>
+                            <span class="keyword">else</span><br>
+                            &nbsp;&nbsp;cout &lt;&lt; <span class="string">"high x"</span>;
+                        </div>
+                        <p data-i18n="accord_ifelse_note">Also known as <strong>double-selection statement</strong>.</p>
+                        <p class="mt-1" data-i18n="accord_cond_op_title"><strong>Conditional Operator (?:)</strong> — closely related to if...else.</p>
+                        <div class="code-block">
+                            grade &gt;= 50 ? cout &lt;&lt; <span class="string">"Passed"</span> : cout &lt;&lt; <span class="string">"Failed"</span>;
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_compound_title">Compound Statements</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_compound_desc">When multiple statements need to be controlled by the if, group them in curly brackets <span class="code-inline">{ }</span>.</p>
+                        <div class="code-block">
+                            <span class="keyword">if</span> (x &lt; 5)<br>
+                            {<br>
+                            &nbsp;&nbsp;x = x + 10;<br>
+                            &nbsp;&nbsp;cout &lt;&lt; x;<br>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_nested_title">Nested if &amp; Dangling else</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_nested_desc">A statement after <span class="code-inline">if (...)</span> can be any kind of statement — including another if.</p>
+                        <p data-i18n="accord_dangling_rule"><strong>Dangling else rule:</strong> An else goes with the closest unmatched if.</p>
+                        <div class="code-block">
+                            <span class="keyword">if</span> (x &gt; 5)<br>
+                            &nbsp;&nbsp;<span class="keyword">if</span> (y &gt; 5)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;cout &lt;&lt; <span class="string">"x and y are &gt; 5"</span>;<br>
+                            &nbsp;&nbsp;<span class="keyword">else</span><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;cout &lt;&lt; <span class="string">"y is &lt;= 5"</span>;<br>
+                            <span class="keyword">else</span><br>
+                            &nbsp;&nbsp;cout &lt;&lt; <span class="string">"x is &lt;= 5"</span>;
+                        </div>
+                        <p class="footnote" data-i18n="accord_dangling_footnote">Use nested statements to force an else to go with a previous if.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_switch_title">switch Statement</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_switch_intro">C++ provides the <strong>switch</strong> statement for multi-way branching.</p>
+                        <div class="code-block">
+                            <span class="keyword">switch</span> (choice) {<br>
+                            &nbsp;&nbsp;<span class="keyword">case</span> 1 : do_option_one(); <span class="keyword">break</span>;<br>
+                            &nbsp;&nbsp;<span class="keyword">case</span> 2 :<br>
+                            &nbsp;&nbsp;<span class="keyword">case</span> 3 : do_2_3_a(); do_2_3_b(); <span class="keyword">break</span>;<br>
+                            &nbsp;&nbsp;<span class="keyword">default</span> : do_something_else();<br>
+                            }
+                        </div>
+                        <ul class="list-dot mt-1">
+                            <li data-i18n="accord_switch_expr"><strong>Switch expression</strong> — cannot be floating point; usually int or char.</li>
+                            <li data-i18n="accord_switch_case"><strong>case</strong> identifiers must be constants.</li>
+                            <li data-i18n="accord_switch_break"><strong>break</strong> causes control to shift to the first statement after the switch.</li>
+                            <li data-i18n="accord_switch_default"><strong>default</strong> executes if the value is NOT found among switch labels.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repetition -->
+            <div class="card mt-1">
+                <h4 data-i18n="control_rep_title">Repetition Statements</h4>
+                <p data-i18n="control_rep_desc">Also called <strong>looping statements</strong> — statements can be repeated. The number of repetitions depends on when the expression turns false.</p>
+                <div class="flex-wrap mt-1">
+                    <span class="chip">while</span>
+                    <span class="chip chip-purple">do...while</span>
+                    <span class="chip chip-teal">for</span>
+                </div>
+
+                <div class="accordion mt-1">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_while_title">while Loop</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_while_syntax"><strong>Syntax:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">while</span> (Expression) <span class="keyword">statement</span>;
+                        </div>
+                        <p data-i18n="accord_while_example"><strong>Example:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">int</span> i;<br>
+                            i = 0;<br>
+                            <span class="keyword">while</span> (i &lt;= 20) {<br>
+                            &nbsp;&nbsp;cout &lt;&lt; i &lt;&lt; <span class="string">" "</span>;<br>
+                            &nbsp;&nbsp;i = i + 5;<br>
+                            }
+                        </div>
+                        <p class="footnote" data-i18n="accord_while_note">Requires: control variable, initial value, loop condition, increment/decrement.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_dowhile_title">do...while Loop</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_dowhile_syntax"><strong>Syntax:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">do</span><br>
+                            &nbsp;&nbsp;<span class="keyword">statement</span>;<br>
+                            <span class="keyword">while</span> (Expression);
+                        </div>
+                        <p data-i18n="accord_dowhile_diff"><strong>Difference from while:</strong> do...while executes the statement at least once.</p>
+                        <div class="code-block">
+                            i = 11;<br>
+                            <span class="keyword">do</span> {<br>
+                            &nbsp;&nbsp;cout &lt;&lt; i &lt;&lt; <span class="string">" "</span>;<br>
+                            &nbsp;&nbsp;i = i + 5;<br>
+                            } <span class="keyword">while</span> (i &lt;= 10);
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_for_title">for Loop</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_for_syntax"><strong>Syntax:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">for</span> (initial statement; loop condition; update statement)<br>
+                            &nbsp;&nbsp;<span class="keyword">statement</span>;
+                        </div>
+                        <p data-i18n="accord_for_flow"><strong>Execution flow:</strong></p>
+                        <ol style="padding-left:1.5rem; color:var(--text-secondary);">
+                            <li data-i18n="accord_for_step1">The initial statement executes.</li>
+                            <li data-i18n="accord_for_step2">The loop condition is evaluated. If true:
+                                <ul style="padding-left:1.5rem;">
+                                    <li data-i18n="accord_for_step2a">Execute the for loop statement.</li>
+                                    <li data-i18n="accord_for_step2b">Execute the update statement.</li>
+                                </ul>
+                            </li>
+                            <li data-i18n="accord_for_step3">Repeat Step 2 until the loop condition evaluates to false.</li>
+                        </ol>
+                        <div class="code-block mt-1">
+                            <span class="comment">// Infinite for loop — prints "Hello" continuously</span><br>
+                            <span class="keyword">for</span> (;;) cout &lt;&lt; <span class="string">"Hello"</span> &lt;&lt; endl;
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FUNCTIONS ===== -->
+        <section id="functions" class="section">
+            <h2><span data-i18n="func_heading">Functions</span> <span class="text-gradient" data-i18n="func_heading_grad">(Modules)</span></h2>
+            <div class="card">
+                <p data-i18n="func_intro">Functions are like building blocks. They let you divide complicated programs into manageable pieces.</p>
+                <ul class="list-dot mt-1">
+                    <li data-i18n="func_adv1">While working on one function, you can focus on just that part and construct, debug, and perfect it.</li>
+                    <li data-i18n="func_adv2">Different people can work on different functions simultaneously.</li>
+                    <li data-i18n="func_adv3">If a function is needed in more than one place, you can write it once and use it many times.</li>
+                    <li data-i18n="func_adv4">Using functions greatly enhances program readability.</li>
+                </ul>
+                <p class="mt-1" data-i18n="func_categories">In C++, functions can be <strong>predefined</strong> or <strong>user-defined</strong>.</p>
+            </div>
+
+            <!-- Predefined -->
+            <div class="card mt-1">
+                <h4 data-i18n="func_predef_title">Predefined Functions</h4>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th data-i18n="func_predef_th1">Function</th><th data-i18n="func_predef_th2">Header</th><th data-i18n="func_predef_th3">Purpose</th><th data-i18n="func_predef_th4">Parameter(s)</th><th data-i18n="func_predef_th5">Result</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="code-inline">abs(x)</span></td><td>&lt;cmath&gt;</td><td data-i18n="func_abs">Absolute value: abs(-7) = 7</td><td>int (double)</td><td>int (double)</td></tr>
+                            <tr><td><span class="code-inline">ceil(x)</span></td><td>&lt;cmath&gt;</td><td data-i18n="func_ceil">Smallest whole number not less than x: ceil(56.34) = 57.0</td><td>double</td><td>double</td></tr>
+                            <tr><td><span class="code-inline">cos(x)</span></td><td>&lt;cmath&gt;</td><td data-i18n="func_cos">Cosine of angle x: cos(0.0) = 1.0</td><td>double (radians)</td><td>double</td></tr>
+                            <tr><td><span class="code-inline">exp(x)</span></td><td>&lt;cmath&gt;</td><td data-i18n="func_exp">e<sup>x</sup>, e = 2.718: exp(1.0) = 2.71828</td><td>double</td><td>double</td></tr>
+                            <tr><td><span class="code-inline">fabs(x)</span></td><td>&lt;cmath&gt;</td><td data-i18n="func_fabs">Absolute value: fabs(-5.67) = 5.67</td><td>double</td><td>double</td></tr>
+                            <tr><td><span class="code-inline">floor(x)</span></td><td>&lt;cmath&gt;</td><td data-i18n="func_floor">Largest whole number not greater than x: floor(45.67) = 45.00</td><td>double</td><td>double</td></tr>
+                            <tr><td><span class="code-inline">islower(x)</span></td><td>&lt;ctype&gt;</td><td data-i18n="func_islower">True if x is lowercase: islower('h') is true</td><td>int</td><td>int</td></tr>
+                            <tr><td><span class="code-inline">isupper(x)</span></td><td>&lt;ctype&gt;</td><td data-i18n="func_isupper">True if x is uppercase: isupper('K') is true</td><td>int</td><td>int</td></tr>
+                            <tr><td><span class="code-inline">pow(x, y)</span></td><td>&lt;math&gt;</td><td data-i18n="func_pow">x<sup>y</sup>: pow(0.16, 0.5) = 0.4</td><td>double</td><td>double</td></tr>
+                            <tr><td><span class="code-inline">sqrt(x)</span></td><td>&lt;math&gt;</td><td data-i18n="func_sqrt">Nonnegative square root: sqrt(4.0) = 2.0</td><td>double</td><td>double</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="code-block mt-1">
+                    <span class="keyword">#include</span> &lt;iostream&gt;<br>
+                    <span class="keyword">#include</span> &lt;cmath&gt;<br>
+                    <span class="keyword">using namespace</span> std;<br><br>
+                    <span class="keyword">int</span> <span class="func">main</span>() {<br>
+                    &nbsp;&nbsp;<span class="keyword">double</span> a = 4.0, b = 2.0;<br>
+                    &nbsp;&nbsp;<span class="keyword">int</span> number = -12;<br>
+                    &nbsp;&nbsp;cout &lt;&lt; <span class="string">"4^2 is "</span> &lt;&lt; pow(a,b) &lt;&lt; endl;<br>
+                    &nbsp;&nbsp;cout &lt;&lt; <span class="string">"|"</span> &lt;&lt; number &lt;&lt; <span class="string">"| = "</span> &lt;&lt; abs(number);<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> 0;<br>
+                    }
+                </div>
+            </div>
+
+            <!-- User-defined -->
+            <div class="card mt-1">
+                <h4 data-i18n="func_user_title">User-Defined Functions</h4>
+                <p data-i18n="func_user_categories">Two categories:</p>
+                <ul class="list-dot">
+                    <li data-i18n="func_user_val"><strong>Value-returning functions</strong> — have a return type and return a value using <span class="code-inline">return</span>.</li>
+                    <li data-i18n="func_user_void"><strong>Void functions</strong> — do not have a return type; do not return a value.</li>
+                </ul>
+
+                <div class="accordion mt-1">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_valreturn_title">Value-Returning Functions</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_valreturn_syntax"><strong>Syntax:</strong></p>
+                        <div class="code-block">
+                            functionType functionName( formal parameter list )<br>
+                            {<br>
+                            &nbsp;&nbsp;statements<br>
+                            }
+                        </div>
+                        <p data-i18n="accord_valreturn_example"><strong>Example:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">double</span> <span class="func">larger</span>(<span class="keyword">double</span> x, <span class="keyword">double</span> y)<br>
+                            {<br>
+                            &nbsp;&nbsp;<span class="keyword">double</span> max;<br>
+                            &nbsp;&nbsp;<span class="keyword">if</span> (x &gt;= y) max = x;<br>
+                            &nbsp;&nbsp;<span class="keyword">else</span> max = y;<br>
+                            &nbsp;&nbsp;<span class="keyword">return</span> max;<br>
+                            }
+                        </div>
+                        <p class="footnote" data-i18n="accord_valreturn_note">The <span class="code-inline">return</span> statement passes a value outside the function.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_void_title">Void Functions</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_void_syntax"><strong>Syntax:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">void</span> functionName( formal parameter list )<br>
+                            {<br>
+                            &nbsp;&nbsp;statements<br>
+                            }
+                        </div>
+                        <p data-i18n="accord_void_example"><strong>Example:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">void</span> <span class="func">larger</span>(<span class="keyword">double</span> x, <span class="keyword">double</span> y)<br>
+                            {<br>
+                            &nbsp;&nbsp;<span class="keyword">double</span> max;<br>
+                            &nbsp;&nbsp;<span class="keyword">if</span> (x &gt;= y) max = x;<br>
+                            &nbsp;&nbsp;<span class="keyword">else</span> max = y;<br>
+                            &nbsp;&nbsp;cout &lt;&lt; max &lt;&lt; endl;<br>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_overload_title">Function Overloading</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_overload_intro">Several functions can have the <strong>same name</strong>. This is called <strong>function overloading</strong>.</p>
+                        <p data-i18n="accord_overload_conditions">Two functions have different formal parameter lists if:</p>
+                        <ul class="list-dot">
+                            <li data-i18n="accord_overload_cond1">A different number of formal parameters, or</li>
+                            <li data-i18n="accord_overload_cond2">If the number is the same, then the data type of the formal parameters (in order) must differ in at least one position.</li>
+                        </ul>
+                        <div class="code-block mt-1">
+                            <span class="keyword">void</span> <span class="func">functionOverload</span>();<br>
+                            <span class="keyword">void</span> <span class="func">functionOverload</span>(<span class="keyword">int</span> x);<br>
+                            <span class="keyword">void</span> <span class="func">functionOverload</span>(<span class="keyword">int</span> x, <span class="keyword">double</span> y);<br>
+                            <span class="keyword">void</span> <span class="func">functionOverload</span>(<span class="keyword">double</span> y, <span class="keyword">int</span> x);<br>
+                            <span class="keyword">int</span> <span class="func">functionOverload</span>(<span class="keyword">char</span> ch, <span class="keyword">int</span> x, <span class="keyword">double</span> y);<br>
+                            <span class="keyword">int</span> <span class="func">functionOverload</span>(<span class="keyword">char</span> ch, <span class="keyword">int</span> x, <span class="keyword">string</span> name);
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)"><span data-i18n="accord_proto_title">Function Prototypes</span> <span class="icon">▾</span></div>
+                    <div class="accordion-body">
+                        <p data-i18n="accord_proto_intro">A <strong>function prototype</strong> is the function heading without the body. It appears before any function definition (including <span class="code-inline">main</span>).</p>
+                        <p data-i18n="accord_proto_syntax"><strong>Syntax:</strong></p>
+                        <div class="code-block">
+                            functionType functionName(formal parameter list);
+                        </div>
+                        <p data-i18n="accord_proto_example"><strong>Example:</strong></p>
+                        <div class="code-block">
+                            <span class="keyword">double</span> larger(<span class="keyword">double</span> x, <span class="keyword">double</span> y);<br>
+                            <span class="comment">// or</span><br>
+                            <span class="keyword">double</span> larger(<span class="keyword">double</span>, <span class="keyword">double</span>);
+                        </div>
+                        <p class="footnote" data-i18n="accord_proto_note">The function prototype ends with a semicolon.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full example -->
+            <div class="card mt-1">
+                <h4 data-i18n="func_full_example_title">Full Example: Function Prototypes &amp; Definitions</h4>
+                <div class="code-block">
+                    <span class="keyword">#include</span> &lt;iostream&gt;<br>
+                    <span class="keyword">using namespace</span> std;<br><br>
+                    <span class="keyword">void</span> <span class="func">func1</span>();<br>
+                    <span class="keyword">void</span> <span class="func">func2</span>();<br><br>
+                    <span class="keyword">int</span> <span class="func">main</span>() {<br>
+                    &nbsp;&nbsp;<span class="keyword">int</span> num;<br>
+                    &nbsp;&nbsp;cout &lt;&lt; <span class="string">"Enter 1 or 2: "</span>;<br>
+                    &nbsp;&nbsp;cin &gt;&gt; num;<br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> (num == 1) func1();<br>
+                    &nbsp;&nbsp;<span class="keyword">else</span> <span class="keyword">if</span> (num == 2) func2();<br>
+                    &nbsp;&nbsp;<span class="keyword">else</span> cout &lt;&lt; <span class="string">"Invalid input"</span> &lt;&lt; endl;<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> 0;<br>
+                    }<br><br>
+                    <span class="keyword">void</span> <span class="func">func1</span>() { cout &lt;&lt; <span class="string">"Programming I."</span> &lt;&lt; endl; }<br>
+                    <span class="keyword">void</span> <span class="func">func2</span>() { cout &lt;&lt; <span class="string">"Programming II."</span> &lt;&lt; endl; }
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FOOTER ===== -->
+        <footer style="padding: 2.5rem 0 2rem; border-top:1px solid var(--border-subtle); text-align:center; color:var(--text-muted); font-size:0.85rem;">
+            <p data-i18n="footer_line1">Programming Fundamentals · C++ Course · 2026</p>
+            <p style="margin-top:0.3rem;" data-i18n="footer_line2">All content from the original PDF — 100% included. Built with ❤️</p>
+        </footer>
+
+    </div><!-- /container -->
+
+    <script>
+        // ── Accordion toggle ──
+        function toggleAccordion(header) {
+            const accordion = header.closest('.accordion');
+            if (!accordion) return;
+            const isActive = accordion.classList.contains('active');
+            const parent = accordion.parentElement;
+            if (parent) {
+                const siblings = parent.querySelectorAll('.accordion');
+                siblings.forEach(el => {
+                    if (el !== accordion) el.classList.remove('active');
+                });
+            }
+            accordion.classList.toggle('active');
+        }
+
+        // ── Translation Dictionary ──
+        const translations = {
+            en: {
+                // Nav
+                nav_objectives: "Objectives",
+                nav_references: "References",
+                nav_marks: "Marks",
+                nav_components: "Components",
+                nav_languages: "Languages",
+                nav_cpp: "C++",
+                nav_datatypes: "Data Types",
+                nav_operators: "Operators",
+                nav_control: "Control",
+                nav_functions: "Functions",
+                // Hero
+                hero_chip: "Lecture Series · 2026",
+                hero_title_part1: "Programming",
+                hero_title_part2: "Fundamentals",
+                hero_subtitle: "A comprehensive introduction to computer programming with C++ — from machine language to modern software development.",
+                hero_meta_lectures: "8 Lectures",
+                hero_meta_cpp: "C++ · Deitel & Malik",
+                hero_meta_coverage: "100% PDF coverage",
+                // Objectives
+                objectives_heading: "Course",
+                objectives_heading_grad: "Objectives",
+                objectives_badge: "Core",
+                obj1_title: "Conceptual foundation",
+                obj1_desc: "To provide students with a general idea about computer programming and its core principles.",
+                obj2_title: "Language evolution",
+                obj2_desc: "To give a background about programming languages evolution — from 1GL to modern high-level languages.",
+                obj3_title: "Hands-on C++",
+                obj3_desc: "To introduce the C++ programming language and explain how practically it can be used (computer lab).",
+                // References
+                ref_heading: "References",
+                ref_badge: "Reading",
+                ref1_title: "C++ How to Program",
+                ref1_edition: "8<sup>th</sup> edition",
+                ref1_author: "Paul Deitel",
+                ref2_title: "C++ Programming: From Problem Analysis to Program Design",
+                ref2_edition: "5<sup>th</sup> Edition",
+                ref2_author: "D.S. Malik",
+                // Marks
+                marks_heading: "Assessment",
+                marks_heading_grad: "Breakdown",
+                marks_badge: "100 Marks",
+                marks_coursework: "Coursework",
+                marks_midterm: "Midterm",
+                marks_final: "Final",
+                // Components
+                components_heading: "Components of the",
+                components_heading_grad: "Computer System",
+                comp_hardware_title: "Hardware",
+                comp_hardware_desc: "The physical equipment that make up a computer system. Major hardware components include:",
+                comp_hw1: "Central Processing Unit (CPU)",
+                comp_hw2: "Main Memory (MM) — also called Random Access Memory (RAM)",
+                comp_hw3: "Input / Output devices",
+                comp_hw4: "Secondary storage",
+                comp_sw_title: "Software",
+                comp_sw_desc: "Programs written to perform specific tasks. All software is written in programming languages.",
+                comp_sw_system: "System Programs",
+                comp_sw_app: "Application Programs",
+                comp_sw1: "<strong>System programs</strong> — control the computer. The operating system loads first; without it, the computer is useless.",
+                comp_sw2: "<strong>Application programs</strong> — perform specific tasks (word processors, spreadsheets, games). The OS runs application programs.",
+                // Languages
+                lang_heading: "Programming",
+                lang_heading_grad: "Languages",
+                lang_intro: "A collection of instructions, symbols and rules used to write a program (code) to perform a specific job.",
+                lang_1gl_title: "1GL · Machine",
+                lang_1gl_chip: "Lowest level",
+                lang_1gl_desc: "The language used to program first-generation computers. Instructions are made of binary numbers (0s and 1s), corresponding to off/on states of electrical switches.",
+                lang_1gl_footnote: "Suitable for machines, very difficult for humans.",
+                lang_2gl_title: "2GL · Assembly",
+                lang_2gl_chip: "Low-level",
+                lang_2gl_desc: "Allows programmers to use abbreviations or easily remembered words instead of numbers. An <strong>assembler</strong> translates assembly into machine language.",
+                lang_3gl_title: "3GL · High-Level",
+                lang_3gl_chip: "Closer to natural language",
+                lang_3gl_desc: "Refinement of 2GL. Uses familiar notation rather than numbers or abbreviations. Most high-level languages are <strong>not machine dependent</strong>.",
+                lang_3gl_translators: "Translators: <strong>Compiler</strong> or <strong>Interpreter</strong>.",
+                lang_asm_table_title: "Assembly ↔ Machine Language",
+                lang_asm_th1: "Assembly Language",
+                lang_asm_th2: "Machine Language",
+                lang_hl_examples_title: "Examples of High-Level Languages",
+                lang_hl_footnote: "Each language follows its own syntactic and semantic rules.",
+                // C++
+                cpp_heading: "Introduction to",
+                cpp_heading_grad: "C++",
+                cpp_badge: "Concepts",
+                cpp_programs_title: "Computer Programs",
+                cpp_programs_desc: "Also known as <strong>\"Code\"</strong> — a collection of instructions that can be executed to perform a specific task.",
+                cpp_components_title: "Program / Code Components",
+                cpp_comp1: "<strong>Constants</strong> — fixed values/data in the program body. <span class=\"code-inline\">const</span> cannot be reassigned.",
+                cpp_comp2: "<strong>Variables</strong> — changeable values/data in the program.",
+                cpp_comp3: "<strong>Methods</strong> — procedures/functions that perform certain tasks.",
+                cpp_structure_title: "Program Structure Example",
+                cpp_components_lang_title: "C++ Language Components",
+                cpp_components_lang_desc: "A C++ program consists of statements; any statement consists of words; any word composes of a set of letters:",
+                cpp_lang1: "Numbers: 0, 1, ..., 9",
+                cpp_lang2: "Alphabet: A–Z, a–z",
+                cpp_lang3: "Symbols, special characters, and mathematical operators: <span class=\"code-inline\">( ) { } . ; / + -</span> and others",
+                cpp_lang_note: "Words (names) in C++ can be built of alphabet, numbers, and underscore (<span class=\"code-inline\">_</span>).",
+                cpp_naming_title: "Rules for C++ Names",
+                cpp_naming1: "A name must start with a letter or underscore.",
+                cpp_naming2: "A name cannot start with a number.",
+                cpp_naming3: "A name can only contain alpha-numeric characters and underscores (A–z, 0–9, _).",
+                cpp_valid: "✅ Valid: count, stud_name, age1, _pl",
+                cpp_invalid: "❌ Invalid: cnt*, stud name, 1age",
+                cpp_reserved: "<strong>Reserved words (keywords)</strong> cannot be used as user-defined names: <span class=\"code-inline\">class</span>, <span class=\"code-inline\">main</span>, <span class=\"code-inline\">public</span>, <span class=\"code-inline\">void</span>, <span class=\"code-inline\">static</span>, etc.",
+                // Data Types
+                datatypes_heading_grad: "Data Types",
+                datatypes_intro: "Variables can store data of different types. C++ supports the following data types:",
+                datatypes_char_desc: "Contains one character: <span class=\"code-inline\">'a'</span>, <span class=\"code-inline\">';'</span>, <span class=\"code-inline\">'1'</span>",
+                datatypes_char_len: "Length: 2 bytes",
+                datatypes_int_desc: "Whole numbers: 1, 30, 100, ...",
+                datatypes_int_th1: "Type",
+                datatypes_int_th2: "Length (bytes)",
+                datatypes_int_note: "An integer must have at least one digit, no decimal point, can be positive or negative.",
+                datatypes_real_desc: "Floating-point numbers: 1.0, 30.25, 100.75",
+                datatypes_real_th1: "Type",
+                datatypes_real_th2: "Length (bytes)",
+                datatypes_real_note: "A real must have at least one digit, may have a decimal point, can be positive or negative.",
+                datatypes_bool_desc: "Contains one of two values: <span class=\"code-inline\">true</span> or <span class=\"code-inline\">false</span>",
+                datatypes_string_desc: "Contains a set of characters: <span class=\"code-inline\">\"Sudan\"</span>, <span class=\"code-inline\">\"Yes, welcome\"</span>",
+                datatypes_decl_var_title: "Declaring Variables",
+                datatypes_decl_const_title: "Declaring Constants",
+                // Operators
+                operators_heading: "Operators in",
+                operators_heading_grad: "C++",
+                operators_math_title: "Mathematical Operations",
+                operators_math_th1: "Operator",
+                operators_math_th2: "Name",
+                operators_math_th3: "Example",
+                operators_math_th4: "Result",
+                op_add: "Addition",
+                op_add_res: "Sum of x and y",
+                op_sub: "Subtraction",
+                op_sub_res: "Difference of x and y",
+                op_mul: "Multiplication",
+                op_mul_res: "Product of x and y",
+                op_div: "Division",
+                op_div_res: "Quotient of x and y",
+                op_mod: "Modulus / remainder",
+                op_mod_res: "Remainder when x divided by y",
+                operators_logical_title: "Logical Operations",
+                operators_logical_note: "Return Boolean value (true / false)",
+                operators_logical_th1: "Operator",
+                operators_logical_th2: "Name",
+                operators_logical_th3: "Example",
+                operators_logical_th4: "Result",
+                op_eq: "Equal",
+                op_eq_res: "True if x is equal to y",
+                op_neq: "Not equal",
+                op_neq_res: "True if x is not equal to y",
+                op_gt: "Greater than",
+                op_gt_res: "True if x is greater than y",
+                op_lt: "Less than",
+                op_lt_res: "True if x is less than y",
+                op_gte: "Greater than or equal",
+                op_gte_res: "True if x is greater than or equal to y",
+                op_lte: "Less than or equal",
+                op_lte_res: "True if x is less than or equal to y",
+                op_and: "And",
+                op_and_res: "True if both x and y are true",
+                op_or: "Or",
+                op_or_res: "True if either x or y is true",
+                op_not: "Not",
+                op_not_res: "True if x is not true",
+                operators_assign_title: "Assignment Operators",
+                operators_assign_th1: "Assignment",
+                operators_assign_th2: "Same as...",
+                operators_assign_th3: "Description",
+                op_assign_desc1: "Left operand gets value of expression on right",
+                op_assign_desc2: "Addition then assign",
+                op_assign_desc3: "Subtraction then assign",
+                op_assign_desc4: "Multiplication then assign",
+                op_assign_desc5: "Division then assign",
+                op_assign_desc6: "Modulus then assign",
+                operators_unary_title: "Unary Operators",
+                operators_unary_note: "Operate on only one operand",
+                operators_unary_th1: "Operator",
+                operators_unary_th2: "Name",
+                operators_unary_th3: "Example",
+                operators_unary_th4: "Description",
+                op_preinc: "Pre-increment",
+                op_preinc_desc: "Increments x by one, then returns x",
+                op_postinc: "Post-increment",
+                op_postinc_desc: "Returns x, then increments x by one",
+                op_predec: "Pre-decrement",
+                op_predec_desc: "Decrements x by one, then returns x",
+                op_postdec: "Post-decrement",
+                op_postdec_desc: "Returns x, then decrements x by one",
+                // Comments
+                comments_heading: "Comments in",
+                comments_heading_grad: "C++",
+                comments_intro: "A comment in C++ code is a line that is <strong>not read/executed</strong> as part of the program. Its only purpose is to be read by someone looking at the code.",
+                comments_use1: "Let others understand what you are doing",
+                comments_use2: "Remind yourself of what you did — most programmers have experienced coming back to their own work a year or two later and having to re-figure out what they did.",
+                // Structure
+                structure_heading: "Structure of a",
+                structure_heading_grad: "C++ Program",
+                structure_comment: "<strong>Comment line</strong> — <span class=\"code-inline\">//</span> lines are ignored by the compiler.",
+                structure_preprocessor: "<strong>Preprocessor directive</strong> — <span class=\"code-inline\">#include &lt;iostream&gt;</span> includes the input/output stream header.",
+                structure_main: "<strong>main function</strong> — the entry point of all C++ programs. Execution starts here.",
+                structure_statement: "<strong>Statement</strong> — <span class=\"code-inline\">cout &lt;&lt; \"Hello World !\";</span> outputs text to the screen.",
+                structure_cout_intro: "<span class=\"code-inline\">cout</span> enables data (output) to be displayed on the screen.",
+                structure_cout_syntax: "<strong>Syntax:</strong> <span class=\"code-inline\">cout &lt;&lt; variable_name</span>",
+                structure_cout_example: "e.g. <span class=\"code-inline\">cout &lt;&lt; age;</span> &nbsp; <span class=\"code-inline\">cout &lt;&lt; \"my age is:\" &lt;&lt; age;</span>",
+                // Control
+                control_heading: "Control",
+                control_heading_grad: "Statements",
+                control_seq_title: "Sequence Statements",
+                control_seq_desc: "Statements can be executed in sequence — one right after the other, with no deviation from the specified sequence.",
+                control_sel_title: "Selection Statements",
+                control_sel_desc: "A selection statement chooses which statement to execute based on whether the expression is true or false.",
+                accord_if_title: "if Statement",
+                accord_if_syntax_title: "<strong>Syntax:</strong>",
+                accord_if_example_title: "<strong>Example:</strong>",
+                accord_if_note: "Also known as <strong>single-selection statement</strong>. If the expression is true, the statement is executed; if false, nothing happens.",
+                accord_ifelse_title: "if...else Statement",
+                accord_ifelse_syntax_title: "<strong>Syntax:</strong>",
+                accord_ifelse_example_title: "<strong>Example:</strong>",
+                accord_ifelse_note: "Also known as <strong>double-selection statement</strong>.",
+                accord_cond_op_title: "<strong>Conditional Operator (?:)</strong> — closely related to if...else.",
+                accord_compound_title: "Compound Statements",
+                accord_compound_desc: "When multiple statements need to be controlled by the if, group them in curly brackets <span class=\"code-inline\">{ }</span>.",
+                accord_nested_title: "Nested if &amp; Dangling else",
+                accord_nested_desc: "A statement after <span class=\"code-inline\">if (...)</span> can be any kind of statement — including another if.",
+                accord_dangling_rule: "<strong>Dangling else rule:</strong> An else goes with the closest unmatched if.",
+                accord_dangling_footnote: "Use nested statements to force an else to go with a previous if.",
+                accord_switch_title: "switch Statement",
+                accord_switch_intro: "C++ provides the <strong>switch</strong> statement for multi-way branching.",
+                accord_switch_expr: "<strong>Switch expression</strong> — cannot be floating point; usually int or char.",
+                accord_switch_case: "<strong>case</strong> identifiers must be constants.",
+                accord_switch_break: "<strong>break</strong> causes control to shift to the first statement after the switch.",
+                accord_switch_default: "<strong>default</strong> executes if the value is NOT found among switch labels.",
+                control_rep_title: "Repetition Statements",
+                control_rep_desc: "Also called <strong>looping statements</strong> — statements can be repeated. The number of repetitions depends on when the expression turns false.",
+                accord_while_title: "while Loop",
+                accord_while_syntax: "<strong>Syntax:</strong>",
+                accord_while_example: "<strong>Example:</strong>",
+                accord_while_note: "Requires: control variable, initial value, loop condition, increment/decrement.",
+                accord_dowhile_title: "do...while Loop",
+                accord_dowhile_syntax: "<strong>Syntax:</strong>",
+                accord_dowhile_diff: "<strong>Difference from while:</strong> do...while executes the statement at least once.",
+                accord_for_title: "for Loop",
+                accord_for_syntax: "<strong>Syntax:</strong>",
+                accord_for_flow: "<strong>Execution flow:</strong>",
+                accord_for_step1: "The initial statement executes.",
+                accord_for_step2: "The loop condition is evaluated. If true:",
+                accord_for_step2a: "Execute the for loop statement.",
+                accord_for_step2b: "Execute the update statement.",
+                accord_for_step3: "Repeat Step 2 until the loop condition evaluates to false.",
+                // Functions
+                func_heading: "Functions",
+                func_heading_grad: "(Modules)",
+                func_intro: "Functions are like building blocks. They let you divide complicated programs into manageable pieces.",
+                func_adv1: "While working on one function, you can focus on just that part and construct, debug, and perfect it.",
+                func_adv2: "Different people can work on different functions simultaneously.",
+                func_adv3: "If a function is needed in more than one place, you can write it once and use it many times.",
+                func_adv4: "Using functions greatly enhances program readability.",
+                func_categories: "In C++, functions can be <strong>predefined</strong> or <strong>user-defined</strong>.",
+                func_predef_title: "Predefined Functions",
+                func_predef_th1: "Function",
+                func_predef_th2: "Header",
+                func_predef_th3: "Purpose",
+                func_predef_th4: "Parameter(s)",
+                func_predef_th5: "Result",
+                func_abs: "Absolute value: abs(-7) = 7",
+                func_ceil: "Smallest whole number not less than x: ceil(56.34) = 57.0",
+                func_cos: "Cosine of angle x: cos(0.0) = 1.0",
+                func_exp: "e<sup>x</sup>, e = 2.718: exp(1.0) = 2.71828",
+                func_fabs: "Absolute value: fabs(-5.67) = 5.67",
+                func_floor: "Largest whole number not greater than x: floor(45.67) = 45.00",
+                func_islower: "True if x is lowercase: islower('h') is true",
+                func_isupper: "True if x is uppercase: isupper('K') is true",
+                func_pow: "x<sup>y</sup>: pow(0.16, 0.5) = 0.4",
+                func_sqrt: "Nonnegative square root: sqrt(4.0) = 2.0",
+                func_user_title: "User-Defined Functions",
+                func_user_categories: "Two categories:",
+                func_user_val: "<strong>Value-returning functions</strong> — have a return type and return a value using <span class=\"code-inline\">return</span>.",
+                func_user_void: "<strong>Void functions</strong> — do not have a return type; do not return a value.",
+                accord_valreturn_title: "Value-Returning Functions",
+                accord_valreturn_syntax: "<strong>Syntax:</strong>",
+                accord_valreturn_example: "<strong>Example:</strong>",
+                accord_valreturn_note: "The <span class=\"code-inline\">return</span> statement passes a value outside the function.",
+                accord_void_title: "Void Functions",
+                accord_void_syntax: "<strong>Syntax:</strong>",
+                accord_void_example: "<strong>Example:</strong>",
+                accord_overload_title: "Function Overloading",
+                accord_overload_intro: "Several functions can have the <strong>same name</strong>. This is called <strong>function overloading</strong>.",
+                accord_overload_conditions: "Two functions have different formal parameter lists if:",
+                accord_overload_cond1: "A different number of formal parameters, or",
+                accord_overload_cond2: "If the number is the same, then the data type of the formal parameters (in order) must differ in at least one position.",
+                accord_proto_title: "Function Prototypes",
+                accord_proto_intro: "A <strong>function prototype</strong> is the function heading without the body. It appears before any function definition (including <span class=\"code-inline\">main</span>).",
+                accord_proto_syntax: "<strong>Syntax:</strong>",
+                accord_proto_example: "<strong>Example:</strong>",
+                accord_proto_note: "The function prototype ends with a semicolon.",
+                func_full_example_title: "Full Example: Function Prototypes &amp; Definitions",
+                // Footer
+                footer_line1: "Programming Fundamentals · C++ Course · 2026",
+                footer_line2: "All content from the original PDF — 100% included. Built with ❤️",
+            },
+            ar: {
+                // Nav
+                nav_objectives: "الأهداف",
+                nav_references: "المراجع",
+                nav_marks: "الدرجات",
+                nav_components: "المكونات",
+                nav_languages: "اللغات",
+                nav_cpp: "C++",
+                nav_datatypes: "أنواع البيانات",
+                nav_operators: "المؤثرات",
+                nav_control: "التحكم",
+                nav_functions: "الدوال",
+                // Hero
+                hero_chip: "سلسلة المحاضرات · 2026",
+                hero_title_part1: "أساسيات",
+                hero_title_part2: "البرمجة",
+                hero_subtitle: "مقدمة شاملة في برمجة الحاسوب باستخدام C++ — من لغة الآلة إلى تطوير البرمجيات الحديث.",
+                hero_meta_lectures: "8 محاضرات",
+                hero_meta_cpp: "C++ · ديتل ومالك",
+                hero_meta_coverage: "تغطية 100% من PDF",
+                // Objectives
+                objectives_heading: "أهداف",
+                objectives_heading_grad: "المقرر",
+                objectives_badge: "أساسي",
+                obj1_title: "الأساس المفاهيمي",
+                obj1_desc: "تزويد الطلاب بفكرة عامة عن برمجة الحاسوب ومبادئها الأساسية.",
+                obj2_title: "تطور اللغات",
+                obj2_desc: "إعطاء خلفية عن تطور لغات البرمجة — من الجيل الأول إلى اللغات عالية المستوى الحديثة.",
+                obj3_title: "تطبيق عملي C++",
+                obj3_desc: "تقديم لغة البرمجة C++ وشرح كيفية استخدامها عملياً (مختبر الحاسوب).",
+                // References
+                ref_heading: "المراجع",
+                ref_badge: "قراءة",
+                ref1_title: "C++ How to Program",
+                ref1_edition: "الطبعة الثامنة",
+                ref1_author: "Paul Deitel",
+                ref2_title: "C++ Programming: From Problem Analysis to Program Design",
+                ref2_edition: "الطبعة الخامسة",
+                ref2_author: "D.S. Malik",
+                // Marks
+                marks_heading: "التقييم",
+                marks_heading_grad: "التوزيع",
+                marks_badge: "100 درجة",
+                marks_coursework: "أعمال السنة",
+                marks_midterm: "منتصف الفصل",
+                marks_final: "نهائي",
+                // Components
+                components_heading: "مكونات",
+                components_heading_grad: "نظام الحاسوب",
+                comp_hardware_title: "المعدات (Hardware)",
+                comp_hardware_desc: "المعدات المادية التي يتكون منها نظام الحاسوب. تشمل المكونات الرئيسية:",
+                comp_hw1: "وحدة المعالجة المركزية (CPU)",
+                comp_hw2: "الذاكرة الرئيسية (MM) — وتسمى أيضاً ذاكرة الوصول العشوائي (RAM)",
+                comp_hw3: "أجهزة الإدخال / الإخراج",
+                comp_hw4: "التخزين الثانوي",
+                comp_sw_title: "البرمجيات (Software)",
+                comp_sw_desc: "برامج مكتوبة لأداء مهام محددة. كل البرمجيات مكتوبة بلغات برمجة.",
+                comp_sw_system: "برامج نظام",
+                comp_sw_app: "برامج تطبيقية",
+                comp_sw1: "<strong>برامج النظام</strong> — تتحكم في الحاسوب. نظام التشغيل هو أول برنامج يتم تحميله؛ بدونه يصبح الحاسوب عديم الفائدة.",
+                comp_sw2: "<strong>البرامج التطبيقية</strong> — تؤدي مهام محددة (معالجات نصوص، جداول بيانات، ألعاب). نظام التشغيل يدير تشغيل البرامج التطبيقية.",
+                // Languages
+                lang_heading: "لغات",
+                lang_heading_grad: "البرمجة",
+                lang_intro: "مجموعة من التعليمات والرموز والقواعد المستخدمة لكتابة برنامج (كود) لأداء مهمة محددة.",
+                lang_1gl_title: "الجيل الأول · لغة الآلة",
+                lang_1gl_chip: "أدنى مستوى",
+                lang_1gl_desc: "اللغة المستخدمة في برمجة أجهزة الجيل الأول. تتكون التعليمات من أرقام ثنائية (0 و 1)، تقابل حالات التشغيل والإيقاف للمفاتيح الكهربائية.",
+                lang_1gl_footnote: "مناسبة للآلة، صعبة جداً على المبرمج البشري.",
+                lang_2gl_title: "الجيل الثاني · لغة التجميع",
+                lang_2gl_chip: "منخفضة المستوى",
+                lang_2gl_desc: "تسمح للمبرمج باستخدام اختصارات أو كلمات سهلة التذكر بدلاً من الأرقام. <strong>المجمع (Assembler)</strong> يترجم لغة التجميع إلى لغة الآلة.",
+                lang_3gl_title: "الجيل الثالث · لغات عالية المستوى",
+                lang_3gl_chip: "أقرب إلى اللغة الطبيعية",
+                lang_3gl_desc: "تطوير للجيل الثاني. تستخدم تدويناً مألوفاً بدلاً من الأرقام أو الاختصارات. معظم اللغات عالية المستوى <strong>غير معتمدة على الآلة</strong>.",
+                lang_3gl_translators: "المترجمات: <strong>مترجم (Compiler)</strong> أو <strong>مفسر (Interpreter)</strong>.",
+                lang_asm_table_title: "لغة التجميع ↔ لغة الآلة",
+                lang_asm_th1: "لغة التجميع",
+                lang_asm_th2: "لغة الآلة",
+                lang_hl_examples_title: "أمثلة على لغات عالية المستوى",
+                lang_hl_footnote: "كل لغة تتبع قواعدها النحوية والدلالية الخاصة.",
+                // C++
+                cpp_heading: "مقدمة إلى",
+                cpp_heading_grad: "C++",
+                cpp_badge: "مفاهيم",
+                cpp_programs_title: "برامج الحاسوب",
+                cpp_programs_desc: "تُعرف أيضاً باسم <strong>\"الكود\"</strong> — مجموعة من التعليمات التي يمكن تنفيذها لأداء مهمة محددة.",
+                cpp_components_title: "مكونات البرنامج / الكود",
+                cpp_comp1: "<strong>الثوابت (Constants)</strong> — قيم / بيانات ثابتة في جسم البرنامج. <span class=\"code-inline\">const</span> لا يمكن إعادة تعيينها.",
+                cpp_comp2: "<strong>المتغيرات (Variables)</strong> — قيم / بيانات قابلة للتغيير في البرنامج.",
+                cpp_comp3: "<strong>الطرق (Methods)</strong> — إجراءات / دوال تؤدي مهام معينة.",
+                cpp_structure_title: "مثال على هيكل البرنامج",
+                cpp_components_lang_title: "مكونات لغة C++",
+                cpp_components_lang_desc: "يتكون برنامج C++ من عبارات، وكل عبارة تتكون من كلمات، وكل كلمة تتكون من مجموعة من الحروف:",
+                cpp_lang1: "الأرقام: 0, 1, ..., 9",
+                cpp_lang2: "الحروف: A–Z, a–z",
+                cpp_lang3: "الرموز، الأحرف الخاصة، والمؤثرات الرياضية: <span class=\"code-inline\">( ) { } . ; / + -</span> وغيرها",
+                cpp_lang_note: "الكلمات (الأسماء) في C++ يمكن أن تتكون من حروف، أرقام، وشرطة سفلية (<span class=\"code-inline\">_</span>).",
+                cpp_naming_title: "قواعد تسمية C++",
+                cpp_naming1: "يجب أن يبدأ الاسم بحرف أو شرطة سفلية.",
+                cpp_naming2: "لا يمكن أن يبدأ الاسم برقم.",
+                cpp_naming3: "يمكن أن يحتوي الاسم فقط على أحرف وأرقام وشرطة سفلية (A–z, 0–9, _).",
+                cpp_valid: "✅ صحيح: count, stud_name, age1, _pl",
+                cpp_invalid: "❌ غير صحيح: cnt*, stud name, 1age",
+                cpp_reserved: "<strong>الكلمات المحجوزة (keywords)</strong> لا يمكن استخدامها كأسماء معرفة من قبل المستخدم: <span class=\"code-inline\">class</span>, <span class=\"code-inline\">main</span>, <span class=\"code-inline\">public</span>, <span class=\"code-inline\">void</span>, <span class=\"code-inline\">static</span> وغيرها.",
+                // Data Types
+                datatypes_heading_grad: "أنواع البيانات",
+                datatypes_intro: "يمكن للمتغيرات تخزين بيانات من أنواع مختلفة. تدعم C++ أنواع البيانات التالية:",
+                datatypes_char_desc: "تحتوي على حرف واحد: <span class=\"code-inline\">'a'</span>، <span class=\"code-inline\">';'</span>، <span class=\"code-inline\">'1'</span>",
+                datatypes_char_len: "الطول: 2 بايت",
+                datatypes_int_desc: "أعداد صحيحة: 1, 30, 100, ...",
+                datatypes_int_th1: "النوع",
+                datatypes_int_th2: "الطول (بايت)",
+                datatypes_int_note: "يجب أن يحتوي العدد الصحيح على رقم واحد على الأقل، لا يحتوي على فاصلة عشرية، يمكن أن يكون موجباً أو سالباً.",
+                datatypes_real_desc: "أعداد عشرية: 1.0, 30.25, 100.75",
+                datatypes_real_th1: "النوع",
+                datatypes_real_th2: "الطول (بايت)",
+                datatypes_real_note: "يجب أن يحتوي العدد الحقيقي على رقم واحد على الأقل، قد يحتوي على فاصلة عشرية، يمكن أن يكون موجباً أو سالباً.",
+                datatypes_bool_desc: "تحتوي على إحدى القيمتين: <span class=\"code-inline\">true</span> أو <span class=\"code-inline\">false</span>",
+                datatypes_string_desc: "تحتوي على مجموعة من الأحرف: <span class=\"code-inline\">\"Sudan\"</span>، <span class=\"code-inline\">\"Yes, welcome\"</span>",
+                datatypes_decl_var_title: "تعريف المتغيرات",
+                datatypes_decl_const_title: "تعريف الثوابت",
+                // Operators
+                operators_heading: "المؤثرات في",
+                operators_heading_grad: "C++",
+                operators_math_title: "العمليات الرياضية",
+                operators_math_th1: "المؤثر",
+                operators_math_th2: "الاسم",
+                operators_math_th3: "مثال",
+                operators_math_th4: "النتيجة",
+                op_add: "الجمع",
+                op_add_res: "مجموع x و y",
+                op_sub: "الطرح",
+                op_sub_res: "الفرق بين x و y",
+                op_mul: "الضرب",
+                op_mul_res: "حاصل ضرب x و y",
+                op_div: "القسمة",
+                op_div_res: "ناتج قسمة x على y",
+                op_mod: "المعامل / الباقي",
+                op_mod_res: "الباقي عند قسمة x على y",
+                operators_logical_title: "العمليات المنطقية",
+                operators_logical_note: "ترجع قيمة منطقية (صحيح / خطأ)",
+                operators_logical_th1: "المؤثر",
+                operators_logical_th2: "الاسم",
+                operators_logical_th3: "مثال",
+                operators_logical_th4: "النتيجة",
+                op_eq: "يساوي",
+                op_eq_res: "صحيح إذا كان x يساوي y",
+                op_neq: "لا يساوي",
+                op_neq_res: "صحيح إذا كان x لا يساوي y",
+                op_gt: "أكبر من",
+                op_gt_res: "صحيح إذا كان x أكبر من y",
+                op_lt: "أصغر من",
+                op_lt_res: "صحيح إذا كان x أصغر من y",
+                op_gte: "أكبر من أو يساوي",
+                op_gte_res: "صحيح إذا كان x أكبر من أو يساوي y",
+                op_lte: "أصغر من أو يساوي",
+                op_lte_res: "صحيح إذا كان x أصغر من أو يساوي y",
+                op_and: "و",
+                op_and_res: "صحيح إذا كان كل من x و y صحيحين",
+                op_or: "أو",
+                op_or_res: "صحيح إذا كان x أو y صحيحاً",
+                op_not: "ليس",
+                op_not_res: "صحيح إذا كان x ليس صحيحاً",
+                operators_assign_title: "مؤثرات الإسناد",
+                operators_assign_th1: "الإسناد",
+                operators_assign_th2: "يعادل...",
+                operators_assign_th3: "الوصف",
+                op_assign_desc1: "المعامل الأيسر يأخذ قيمة التعبير الأيمن",
+                op_assign_desc2: "جمع ثم إسناد",
+                op_assign_desc3: "طرح ثم إسناد",
+                op_assign_desc4: "ضرب ثم إسناد",
+                op_assign_desc5: "قسمة ثم إسناد",
+                op_assign_desc6: "معامل ثم إسناد",
+                operators_unary_title: "المؤثرات الأحادية",
+                operators_unary_note: "تعمل على معامل واحد فقط",
+                operators_unary_th1: "المؤثر",
+                operators_unary_th2: "الاسم",
+                operators_unary_th3: "مثال",
+                operators_unary_th4: "الوصف",
+                op_preinc: "الزيادة المسبقة",
+                op_preinc_desc: "يزيد x بمقدار 1، ثم يعيد x",
+                op_postinc: "الزيادة اللاحقة",
+                op_postinc_desc: "يعيد x، ثم يزيد x بمقدار 1",
+                op_predec: "النقصان المسبق",
+                op_predec_desc: "ينقص x بمقدار 1، ثم يعيد x",
+                op_postdec: "النقصان اللاحق",
+                op_postdec_desc: "يعيد x، ثم ينقص x بمقدار 1",
+                // Comments
+                comments_heading: "التعليقات في",
+                comments_heading_grad: "C++",
+                comments_intro: "التعليق في كود C++ هو سطر <strong>لا يُقرأ / لا يُنفذ</strong> كجزء من البرنامج. الغرض منه فقط أن يقرأه شخص يطلع على الكود.",
+                comments_use1: "مساعدة الآخرين على فهم ما تفعله",
+                comments_use2: "تذكير نفسك بما فعلته — معظم المبرمجين مروا بتجربة العودة إلى عملهم بعد سنة أو سنتين وإعادة اكتشاف ما فعلوه.",
+                // Structure
+                structure_heading: "هيكل",
+                structure_heading_grad: "برنامج C++",
+                structure_comment: "<strong>سطر التعليق</strong> — <span class=\"code-inline\">//</span> يتم تجاهله من قبل المترجم.",
+                structure_preprocessor: "<strong>توجيه المعالج المسبق</strong> — <span class=\"code-inline\">#include &lt;iostream&gt;</span> يقوم بتضمين ملف الرأس الخاص بالإدخال / الإخراج.",
+                structure_main: "<strong>دالة main</strong> — نقطة الدخول لجميع برامج C++. يبدأ التنفيذ منها.",
+                structure_statement: "<strong>العبارة</strong> — <span class=\"code-inline\">cout &lt;&lt; \"Hello World !\";</span> تخرج نصاً إلى الشاشة.",
+                structure_cout_intro: "<span class=\"code-inline\">cout</span> تمكن من عرض البيانات (المخرجات) على الشاشة.",
+                structure_cout_syntax: "<strong>الصياغة:</strong> <span class=\"code-inline\">cout &lt;&lt; variable_name</span>",
+                structure_cout_example: "مثال: <span class=\"code-inline\">cout &lt;&lt; age;</span> &nbsp; <span class=\"code-inline\">cout &lt;&lt; \"my age is:\" &lt;&lt; age;</span>",
+                // Control
+                control_heading: "عبارات",
+                control_heading_grad: "التحكم",
+                control_seq_title: "عبارات التسلسل",
+                control_seq_desc: "يمكن تنفيذ العبارات بتسلسل — واحدة تلو الأخرى، بدون انحراف عن التسلسل المحدد.",
+                control_sel_title: "عبارات الاختيار",
+                control_sel_desc: "عبارة الاختيار تحدد أي عبارة سيتم تنفيذها بناءً على ما إذا كان التعبير صحيحاً أم خطأ.",
+                accord_if_title: "عبارة if",
+                accord_if_syntax_title: "<strong>الصياغة:</strong>",
+                accord_if_example_title: "<strong>مثال:</strong>",
+                accord_if_note: "تُعرف أيضاً باسم <strong>عبارة الاختيار المفرد</strong>. إذا كان التعبير صحيحاً، يتم تنفيذ العبارة؛ وإذا كان خطأ، لا يحدث شيء.",
+                accord_ifelse_title: "عبارة if...else",
+                accord_ifelse_syntax_title: "<strong>الصياغة:</strong>",
+                accord_ifelse_example_title: "<strong>مثال:</strong>",
+                accord_ifelse_note: "تُعرف أيضاً باسم <strong>عبارة الاختيار المزدوج</strong>.",
+                accord_cond_op_title: "<strong>المؤثر الشرطي (?:)</strong> — مرتبط ارتباطاً وثيقاً بـ if...else.",
+                accord_compound_title: "العبارات المركبة",
+                accord_compound_desc: "عند الحاجة إلى التحكم بعدة عبارات بواسطة if، يتم تجميعها بين قوسين معقوفين <span class=\"code-inline\">{ }</span>.",
+                accord_nested_title: "if المتداخلة و else المعلقة",
+                accord_nested_desc: "يمكن أن تكون العبارة بعد <span class=\"code-inline\">if (...)</span> أي نوع من العبارات — بما في ذلك if أخرى.",
+                accord_dangling_rule: "<strong>قاعدة else المعلقة:</strong> يرتبط else بأقرب if غير مقترن.",
+                accord_dangling_footnote: "استخدم العبارات المتداخلة لإجبار else على الالتحاق بـ if سابق.",
+                accord_switch_title: "عبارة switch",
+                accord_switch_intro: "توفر C++ عبارة <strong>switch</strong> للتفرع متعدد الاتجاهات.",
+                accord_switch_expr: "<strong>تعبير switch</strong> — لا يمكن أن يكون عدداً عشرياً؛ عادةً int أو char.",
+                accord_switch_case: "<strong>case</strong> يجب أن تكون معرفات ثابتة.",
+                accord_switch_break: "<strong>break</strong> ينقل التحكم إلى أول عبارة بعد switch.",
+                accord_switch_default: "<strong>default</strong> يُنفذ إذا لم يتم العثور على القيمة بين تسميات switch.",
+                control_rep_title: "عبارات التكرار",
+                control_rep_desc: "تُسمى أيضاً <strong>عبارات الحلقات</strong> — يمكن تكرار العبارات. عدد التكرارات يعتمد على متى يصبح التعبير خطأ.",
+                accord_while_title: "حلقة while",
+                accord_while_syntax: "<strong>الصياغة:</strong>",
+                accord_while_example: "<strong>مثال:</strong>",
+                accord_while_note: "تتطلب: متغير تحكم، قيمة ابتدائية، شرط الحلقة، زيادة / نقصان.",
+                accord_dowhile_title: "حلقة do...while",
+                accord_dowhile_syntax: "<strong>الصياغة:</strong>",
+                accord_dowhile_diff: "<strong>الفرق عن while:</strong> do...while تنفذ العبارة مرة واحدة على الأقل.",
+                accord_for_title: "حلقة for",
+                accord_for_syntax: "<strong>الصياغة:</strong>",
+                accord_for_flow: "<strong>سير التنفيذ:</strong>",
+                accord_for_step1: "تُنفذ العبارة الابتدائية.",
+                accord_for_step2: "يُقيَّم شرط الحلقة. إذا كان صحيحاً:",
+                accord_for_step2a: "تنفيذ عبارة الحلقة for.",
+                accord_for_step2b: "تنفيذ عبارة التحديث.",
+                accord_for_step3: "تكرار الخطوة 2 حتى يصبح شرط الحلقة خطأ.",
+                // Functions
+                func_heading: "الدوال",
+                func_heading_grad: "(وحدات)",
+                func_intro: "الدوال مثل اللبنات الأساسية. تتيح لك تقسيم البرامج المعقدة إلى أجزاء قابلة للإدارة.",
+                func_adv1: "أثناء العمل على دالة واحدة، يمكنك التركيز على هذا الجزء فقط وإنشائه وتصحيح أخطائه وإتقانه.",
+                func_adv2: "يمكن لأشخاص مختلفين العمل على دوال مختلفة في وقت واحد.",
+                func_adv3: "إذا كانت دالة مطلوبة في أكثر من مكان في البرنامج أو في برامج مختلفة، يمكنك كتابتها مرة واحدة واستخدامها عدة مرات.",
+                func_adv4: "استخدام الدوال يعزز قابلية قراءة البرنامج بشكل كبير.",
+                func_categories: "في C++، يمكن أن تكون الدوال <strong>معدة مسبقاً</strong> أو <strong>معرفة من قبل المستخدم</strong>.",
+                func_predef_title: "الدوال المعدة مسبقاً",
+                func_predef_th1: "الدالة",
+                func_predef_th2: "ملف الرأس",
+                func_predef_th3: "الغرض",
+                func_predef_th4: "المعامل (أنواعه)",
+                func_predef_th5: "النتيجة",
+                func_abs: "القيمة المطلقة: abs(-7) = 7",
+                func_ceil: "أصغر عدد صحيح لا يقل عن x: ceil(56.34) = 57.0",
+                func_cos: "جيب تمام الزاوية x: cos(0.0) = 1.0",
+                func_exp: "e<sup>x</sup>، حيث e = 2.718: exp(1.0) = 2.71828",
+                func_fabs: "القيمة المطلقة: fabs(-5.67) = 5.67",
+                func_floor: "أكبر عدد صحيح لا يزيد عن x: floor(45.67) = 45.00",
+                func_islower: "صحيح إذا كان x حرفاً صغيراً: islower('h') صحيح",
+                func_isupper: "صحيح إذا كان x حرفاً كبيراً: isupper('K') صحيح",
+                func_pow: "x<sup>y</sup>: pow(0.16, 0.5) = 0.4",
+                func_sqrt: "الجذر التربيعي غير السالب: sqrt(4.0) = 2.0",
+                func_user_title: "الدوال المعرفة من قبل المستخدم",
+                func_user_categories: "فئتان:",
+                func_user_val: "<strong>دوال إرجاع قيمة</strong> — لها نوع إرجاع وتعيد قيمة باستخدام <span class=\"code-inline\">return</span>.",
+                func_user_void: "<strong>دوال void</strong> — ليس لها نوع إرجاع؛ لا تعيد قيمة.",
+                accord_valreturn_title: "دوال إرجاع القيمة",
+                accord_valreturn_syntax: "<strong>الصياغة:</strong>",
+                accord_valreturn_example: "<strong>مثال:</strong>",
+                accord_valreturn_note: "عبارة <span class=\"code-inline\">return</span> تنقل القيمة إلى خارج الدالة.",
+                accord_void_title: "دوال void",
+                accord_void_syntax: "<strong>الصياغة:</strong>",
+                accord_void_example: "<strong>مثال:</strong>",
+                accord_overload_title: "تحميل الدوال (Overloading)",
+                accord_overload_intro: "يمكن أن يكون لعدة دوال <strong>نفس الاسم</strong>. هذا يسمى <strong>تحميل الدوال</strong>.",
+                accord_overload_conditions: "تكون قائمتا المعاملات الرسمية مختلفتين إذا:",
+                accord_overload_cond1: "عدد مختلف من المعاملات الرسمية، أو",
+                accord_overload_cond2: "إذا كان العدد متساوياً، فإن نوع بيانات المعاملات الرسمية (بالترتيب) يجب أن يختلف في موضع واحد على الأقل.",
+                accord_proto_title: "النماذج الأولية للدوال",
+                accord_proto_intro: "<strong>النموذج الأولي للدالة</strong> هو عنوان الدالة بدون جسمها. يظهر قبل أي تعريف دالة (بما في ذلك تعريف <span class=\"code-inline\">main</span>).",
+                accord_proto_syntax: "<strong>الصياغة:</strong>",
+                accord_proto_example: "<strong>مثال:</strong>",
+                accord_proto_note: "ينتهي النموذج الأولي للدالة بفاصلة منقوطة.",
+                func_full_example_title: "مثال كامل: النماذج الأولية وتعريفات الدوال",
+                // Footer
+                footer_line1: "أساسيات البرمجة · مقرر C++ · 2026",
+                footer_line2: "جميع المحتويات من ملف PDF الأصلي — مضمونة 100%. تم البناء بـ ❤️",
+            }
+        };
+
+        // ── Language switching logic ──
+        let currentLang = 'en'; // default
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            // Update HTML dir
+            const html = document.documentElement;
+            if (lang === 'ar') {
+                html.setAttribute('dir', 'rtl');
+                html.setAttribute('lang', 'ar');
+            } else {
+                html.setAttribute('dir', 'ltr');
+                html.setAttribute('lang', 'en');
+            }
+
+            // Update toggle buttons
+            document.querySelectorAll('#langToggle button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            // Get translation object
+            const dict = translations[lang] || translations.en;
+
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key] !== undefined) {
+                    el.innerHTML = dict[key];
+                }
+            });
+
+            // Save preference
+            try {
+                localStorage.setItem('lang', lang);
+            } catch (e) { /* ignore */ }
+        }
+
+        // ── Toggle event ──
+        document.getElementById('langToggle').addEventListener('click', function(e) {
+            const btn = e.target.closest('button
