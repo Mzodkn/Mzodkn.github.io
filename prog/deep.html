@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Mathematics — Interactive Study Platform</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-surface-hover: #273449;
+            --bg-elevated: #263449;
+            --border-subtle: #334155;
+            --border-strong: #475569;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --accent-violet: #a78bfa;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --error: #f87171;
+            --code-bg: #0d1424;
+            --sidebar-bg: #121a2b;
+            --sidebar-width: 300px;
+            --header-height: 64px;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: calc(var(--header-height) + 20px);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Inter', 'Readex Pro', sans-serif;
+            line-height: 1.7;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body[dir="rtl"] {
+            font-family: 'Cairo', 'Readex Pro', 'Inter', sans-serif;
+        }
+
+        body[dir="rtl"] code,
+        body[dir="rtl"] .math-symbol,
+        body[dir="rtl"] .en-term {
+            font-family: 'Inter', 'Readex Pro', monospace;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-subtle);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            z-index: 50;
+            overflow-y: auto;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-strong) transparent;
+        }
+        body[dir="rtl"] .sidebar {
+            left: auto;
+            right: 0;
+            border-right: none;
+            border-left: 1px solid var(--border-subtle);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 3px;
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+        body[dir="rtl"] .sidebar.closed {
+            transform: translateX(100%);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 0;
+            min-height: 100vh;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body[dir="rtl"] .main-content {
+            margin-left: 0;
+            margin-right: var(--sidebar-width);
+        }
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        body[dir="rtl"] .main-content.expanded {
+            margin-right: 0;
+        }
+
+        /* Overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 45;
+            backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Nav items */
+        .nav-chapter {
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+        }
+        .nav-chapter-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            text-align: left;
+            transition: background-color 0.15s, color 0.15s;
+        }
+        body[dir="rtl"] .nav-chapter-btn {
+            text-align: right;
+        }
+        .nav-chapter-btn:hover {
+            background-color: rgba(56, 189, 248, 0.08);
+            color: var(--text-primary);
+        }
+        .nav-chapter-btn.active {
+            background-color: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+        body[dir="rtl"] .nav-chapter-btn.active {
+            border-left: none;
+            border-right: 3px solid var(--accent);
+        }
+
+        .nav-sublinks {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-sublinks.open {
+            max-height: 600px;
+        }
+        .nav-sublink {
+            display: block;
+            padding: 8px 16px 8px 32px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.15s, background-color 0.15s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        body[dir="rtl"] .nav-sublink {
+            padding: 8px 32px 8px 16px;
+            text-align: right;
+        }
+        .nav-sublink:hover {
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+        .nav-sublink.active {
+            color: var(--accent);
+        }
+
+        /* Cards and components */
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        .card:hover {
+            border-color: var(--border-strong);
+        }
+
+        .definition-box {
+            background-color: rgba(56, 189, 248, 0.06);
+            border-left: 4px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        body[dir="rtl"] .definition-box {
+            border-left: none;
+            border-right: 4px solid var(--accent);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .example-box {
+            background-color: rgba(167, 139, 250, 0.06);
+            border-left: 4px solid var(--accent-violet);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        body[dir="rtl"] .example-box {
+            border-left: none;
+            border-right: 4px solid var(--accent-violet);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .key-takeaway {
+            background-color: rgba(52, 211, 153, 0.06);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 12px 0;
+        }
+
+        .truth-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+        .truth-table th,
+        .truth-table td {
+            padding: 10px 16px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .truth-table th {
+            background-color: var(--bg-elevated);
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .truth-table td {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .truth-table tr:last-child td {
+            border-bottom: none;
+        }
+        .truth-table .highlight {
+            background-color: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin: 6px 0;
+            font-size: 0.9rem;
+        }
+        .quiz-option:hover {
+            border-color: var(--border-strong);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+        .quiz-option.correct {
+            border-color: var(--success);
+            background-color: rgba(52, 211, 153, 0.1);
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error);
+            background-color: rgba(248, 113, 113, 0.1);
+            color: var(--error);
+        }
+        .quiz-option input[type="radio"] {
+            accent-color: var(--accent);
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .search-highlight {
+            background-color: rgba(251, 191, 36, 0.3);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .breadcrumb {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 12px 0;
+        }
+        .breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .breadcrumb a:hover {
+            color: var(--accent);
+        }
+        .breadcrumb .separator {
+            color: var(--border-strong);
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin: 12px 0;
+            font-family: 'Inter', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .tag-blue {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: var(--accent);
+        }
+        .tag-violet {
+            background-color: rgba(167, 139, 250, 0.15);
+            color: var(--accent-violet);
+        }
+        .tag-green {
+            background-color: rgba(52, 211, 153, 0.15);
+            color: var(--success);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            body[dir="rtl"] .sidebar {
+                transform: translateX(100%);
+            }
+            .sidebar.open-mobile {
+                transform: translateX(0) !important;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+            .card {
+                padding: 14px 16px;
+            }
+            .truth-table th,
+            .truth-table td {
+                padding: 6px 8px;
+                font-size: 0.78rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div style="padding: 20px 16px; border-bottom: 1px solid var(--border-subtle);">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#38bdf8,#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;color:#fff;flex-shrink:0;">DM</div>
+                <div>
+                    <div style="font-weight:700;font-size:1rem;color:var(--text-primary);" data-i18n="app_title">Discrete Mathematics</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);" data-i18n="app_subtitle">Interactive Study Guide</div>
+                </div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button onclick="switchLanguage('en')" id="langEnBtn" class="tag tag-blue" style="cursor:pointer;border:none;">EN</button>
+                <button onclick="switchLanguage('ar')" id="langArBtn" class="tag tag-blue" style="cursor:pointer;border:none;opacity:0.5;">عربي</button>
+            </div>
+        </div>
+        <nav id="sidebarNav" style="padding: 8px 0;"></nav>
+        <div style="padding:16px;border-top:1px solid var(--border-subtle);font-size:0.75rem;color:var(--text-muted);text-align:center;">
+            <span data-i18n="grading_note">Grading: Assignments 40% · Midterm 20% · Final 40%</span>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Header -->
+        <header style="position:sticky;top:0;z-index:40;background-color:var(--bg-base);border-bottom:1px solid var(--border-subtle);height:var(--header-height);display:flex;align-items:center;padding:0 20px;gap:12px;">
+            <button onclick="toggleSidebar()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;display:flex;align-items:center;gap:6px;font-size:0.9rem;" aria-label="Toggle sidebar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div style="flex:1;max-width:500px;position:relative;">
+                <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search topics..." style="width:100%;padding:8px 14px 8px 36px;border-radius:8px;border:1px solid var(--border-subtle);background-color:var(--bg-surface);color:var(--text-primary);font-size:0.85rem;outline:none;transition:border-color 0.2s;" data-i18n-placeholder="search_placeholder">
+                <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+                <div id="searchResults" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg-elevated);border:1px solid var(--border-strong);border-radius:8px;margin-top:6px;max-height:300px;overflow-y:auto;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.3);"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button onclick="switchLanguage(currentLang === 'en' ? 'ar' : 'en')" style="padding:6px 12px;border-radius:6px;border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;font-size:0.8rem;font-weight:600;" id="langToggleBtn" data-i18n="lang_toggle">عربي</button>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div style="padding:20px 28px 60px 28px;max-width:1000px;margin:0 auto;" id="pageContent">
+            <!-- Content is rendered here by JS -->
+        </div>
+
+        <!-- Footer -->
+        <footer style="border-top:1px solid var(--border-subtle);padding:20px 28px;text-align:center;color:var(--text-muted);font-size:0.8rem;">
+            <p data-i18n="footer_text">Discrete Mathematics — Interactive Study Platform. Built for deep learning.</p>
+            <p style="margin-top:4px;">© 2026 · <span data-i18n="footer_rights">All rights reserved</span></p>
+        </footer>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONTENT DATA — Bilingual (EN/AR)
+        // ============================================================
+        const contentData = {
+            en: {
+                app_title: "Discrete Mathematics",
+                app_subtitle: "Interactive Study Guide",
+                search_placeholder: "Search topics...",
+                lang_toggle: "عربي",
+                grading_note: "Grading: Assignments 40% · Midterm 20% · Final 40%",
+                footer_text: "Discrete Mathematics — Interactive Study Platform. Built for deep learning.",
+                footer_rights: "All rights reserved",
+                breadcrumb_home: "Home",
+                chapters: [{
+                    id: "ch1",
+                    number: "01",
+                    title: "Introduction to Mathematical Logic",
+                    icon: "🧠",
+                    overview: "Fundamentals of propositional logic: propositions, statements, truth values, and open propositions.",
+                    sections: [
+                        { id: "ch1-s1", title: "What is Logic?", subsections: [
+                            { type: "text", content: "Logic is the systematic study of valid reasoning. In computer science and mathematics, it forms the backbone of program design, circuit design, and formal verification. Propositional logic deals with statements that are either true or false — no ambiguity, no in-between." },
+                            { type: "definition", title: "Definition: Proposition", content: "A <strong>proposition</strong> (or statement) is a declarative sentence that is either <strong>true (T)</strong> or <strong>false (F)</strong>, but not both simultaneously." },
+                            { type: "real-world", title: "Real-World Connection", content: "When you write an <code>if</code> statement in programming, the condition inside parentheses is a proposition. For example, <code>if (age >= 18)</code> — the expression <code>age >= 18</code> evaluates to either true or false. This is exactly what propositional logic formalizes." }
+                        ]},
+                        { id: "ch1-s2", title: "The Statement/Proposition Game", subsections: [
+                            { type: "text", content: "Let's analyze several sentences to determine whether they qualify as propositions:" },
+                            { type: "example", title: "Example Analysis", content: "<ul style='list-style:disc;padding-left:24px;margin:8px 0;'><li>\"Elephants are bigger than mice.\" → <strong>Proposition</strong> (true)</li><li>\"520 < 111\" → <strong>Proposition</strong> (false)</li><li>\"y > 5\" → <strong>Not a proposition</strong> (depends on y — called an <em>open sentence</em>)</li><li>\"Please do not fall asleep.\" → <strong>Not a proposition</strong> (it's a request, not declarative)</li><li>\"x < y if and only if y > x\" → <strong>Proposition</strong> (always true, regardless of x and y)</li></ul>" },
+                            { type: "key-takeaway", content: "Only <strong>declarative sentences</strong> with a definite truth value are propositions. Questions, commands, exclamations, and sentences with unbound variables are <strong>not</strong> propositions." }
+                        ]},
+                        { id: "ch1-s3", title: "Open Propositions (Propositional Functions)", subsections: [
+                            { type: "text", content: "An <strong>open proposition</strong> (or predicate) is a statement involving one or more variables. Its truth value depends on the value assigned to the variable(s)." },
+                            { type: "code", content: "P(x): x - 3 > 5\n\nP(2)  → 2 - 3 > 5  →  -1 > 5  →  false\nP(8)  → 8 - 3 > 5  →  5 > 5   →  false\nP(9)  → 9 - 3 > 5  →  6 > 5   →  true" },
+                            { type: "text", content: "When we assign a specific value to the variable (e.g., x = 9), we say the variable is <strong>instantiated</strong>, and the open proposition becomes a closed proposition with a definite truth value." }
+                        ]},
+                        { id: "ch1-s4", title: "Combining Propositions", subsections: [
+                            { type: "text", content: "Just as we combine numbers with arithmetic operations (+, -, ×, ÷), we combine propositions using <strong>logical connectives</strong> (also called logical operators). We denote propositions with letters: p, q, r, s, ..." },
+                            { type: "text", content: "The six fundamental connectives we will study are: <strong>Negation (¬)</strong>, <strong>Conjunction (∧)</strong>, <strong>Disjunction (∨)</strong>, <strong>Exclusive-Or (⊕)</strong>, <strong>Implication (→)</strong>, and <strong>Biconditional (↔)</strong>. Each one has a precise truth table definition." }
+                        ]}
+                    ],
+                    takeaways: [
+                        "A proposition is a declarative statement that is either true or false.",
+                        "Open sentences contain variables and are not propositions until instantiated.",
+                        "Propositions can be combined using logical connectives to form compound propositions.",
+                        "Truth values in logic correspond to 1 (true) and 0 (false) in digital circuits."
+                    ],
+                    quiz: [
+                        { q: "Which of the following IS a proposition?", options: ["\"Please close the door.\"", "\"x + 2 = 7\"", "\"The sun rises in the east.\"", "\"Is it raining?\""],
+                            correct: 2 },
+                        { q: "What is the truth value of \"520 < 111\"?", options: ["True", "False", "It depends",
+                                "Not a proposition"
+                            ], correct: 1 },
+                        { q: "\"y > 5\" is best classified as:", options: ["A proposition", "An open proposition",
+                                "A tautology", "A contradiction"
+                            ], correct: 1 },
+                        { q: "In digital circuits, the truth value 'true' corresponds to which digit?", options: ["0",
+                                "1", "2", "undefined"
+                            ], correct: 1 }
+                    ]
+                }, {
+                    id: "ch2",
+                    number: "02",
+                    title: "Logical Operators (Connectives)",
+                    icon: "⚡",
+                    overview: "Complete truth tables for all six logical connectives, operator precedence, tautologies, contradictions, and equivalence laws.",
+                    sections: [
+                        { id: "ch2-s1", title: "Negation (NOT) — ¬", subsections: [
+                            { type: "text", content: "Negation is a <strong>unary operator</strong> that flips the truth value of a proposition. If p is true, ¬p is false, and vice versa." },
+                            { type: "truth-table", headers: ["P", "¬P"], rows: [
+                                ["T", "F"],
+                                ["F", "T"]
+                            ] },
+                            { type: "example", title: "Example", content: "P: \"It is raining.\" → ¬P: \"It is NOT raining.\"" }
+                        ]},
+                        { id: "ch2-s2", title: "Conjunction (AND) — ∧", subsections: [
+                            { type: "text", content: "Conjunction is a <strong>binary operator</strong>. P ∧ Q is true only when <strong>both</strong> P and Q are true." },
+                            { type: "truth-table", headers: ["P", "Q", "P ∧ Q"], rows: [
+                                ["T", "T", "T"],
+                                ["T", "F", "F"],
+                                ["F", "T", "F"],
+                                ["F", "F", "F"]
+                            ] },
+                            { type: "real-world", title: "Programming Connection",
+                                content: "In code, this is the <code>&&</code> operator. <code>if (isLoggedIn && hasPermission)</code> — both conditions must be true for the block to execute." }
+                        ]},
+                        { id: "ch2-s3", title: "Disjunction (OR) — ∨", subsections: [
+                            { type: "text", content: "Disjunction is a <strong>binary operator</strong>. P ∨ Q is true when <strong>at least one</strong> of P or Q is true. (Inclusive OR.)" },
+                            { type: "truth-table", headers: ["P", "Q", "P ∨ Q"], rows: [
+                                ["T", "T", "T"],
+                                ["T", "F", "T"],
+                                ["F", "T", "T"],
+                                ["F", "F", "F"]
+                            ] },
+                            { type: "real-world", title: "Real-World Usage",
+                                content: "In a login system: \"Access granted if user has admin rights OR user has superuser rights.\" This is an inclusive OR — if both are true, access is still granted." }
+                        ]},
+                        { id: "ch2-s4", title: "Exclusive-Or (XOR) — ⊕", subsections: [
+                            { type: "text", content: "XOR is true when <strong>exactly one</strong> of the inputs is true — not both." },
+                            { type: "truth-table", headers: ["P", "Q", "P ⊕ Q"], rows: [
+                                ["T", "T", "F"],
+                                ["T", "F", "T"],
+                                ["F", "T", "T"],
+                                ["F", "F", "F"]
+                            ] },
+                            { type: "example", title: "Natural Language Ambiguity",
+                                content: "\"You get $2000 cash back OR a 2% car loan.\" In natural language, this is usually understood as XOR — you get one or the other, not both. This is why we need precise logical notation to remove ambiguity." }
+                        ]},
+                        { id: "ch2-s5", title: "Implication (if-then) — →", subsections: [
+                            { type: "text", content: "Implication is the trickiest connective. P → Q means \"if P then Q.\" It is <strong>false only when P is true and Q is false</strong>. In all other cases, it is true." },
+                            { type: "truth-table", headers: ["P", "Q", "P → Q"], rows: [
+                                ["T", "T", "T"],
+                                ["T", "F", "F"],
+                                ["F", "T", "T"],
+                                ["F", "F", "T"]
+                            ] },
+                            { type: "example", title: "Understanding the Logic",
+                                content: "\"If it rains, the ground gets wet.\" (P → Q)<br>• If it rains and ground is wet → true (P=T, Q=T)<br>• If it rains but ground is dry → false (P=T, Q=F) — the implication is violated!<br>• If it doesn't rain, the implication says nothing about the ground (P=F → always true)" },
+                            { type: "key-takeaway", content: "P → Q ≡ ¬P ∨ Q. An implication is only false when the antecedent is true and the consequent is false." }
+                        ]},
+                        { id: "ch2-s6", title: "Biconditional (if and only if) — ↔", subsections: [
+                            { type: "text", content: "P ↔ Q means \"P if and only if Q.\" It is true when P and Q have the <strong>same</strong> truth value." },
+                            { type: "truth-table", headers: ["P", "Q", "P ↔ Q"], rows: [
+                                ["T", "T", "T"],
+                                ["T", "F", "F"],
+                                ["F", "T", "F"],
+                                ["F", "F", "T"]
+                            ] },
+                            { type: "text", content: "Note: P ↔ Q ≡ (P → Q) ∧ (Q → P)." }
+                        ]},
+                        { id: "ch2-s7", title: "Operator Precedence", subsections: [
+                            { type: "text", content: "When multiple operators appear in an expression, they are evaluated in this order (highest to lowest):" },
+                            { type: "code", content: "1. ¬  (Negation)\n2. ∧  (Conjunction)\n3. ∨  (Disjunction)\n4. →  (Implication)\n5. ↔  (Biconditional)" },
+                            { type: "example", title: "Example", content: "¬P ∧ Q ∨ R → S is parsed as: (((¬P) ∧ Q) ∨ R) → S" }
+                        ]},
+                        { id: "ch2-s8", title: "Tautologies and Contradictions", subsections: [
+                            { type: "definition", title: "Tautology", content: "A statement that is <strong>always true</strong> regardless of the truth values of its components. Example: P ∨ ¬P" },
+                            { type: "definition", title: "Contradiction", content: "A statement that is <strong>always false</strong> regardless of the truth values of its components. Example: P ∧ ¬P" },
+                            { type: "text", content: "The negation of a tautology is a contradiction, and the negation of a contradiction is a tautology." }
+                        ]},
+                        { id: "ch2-s9", title: "Logical Equivalence", subsections: [
+                            { type: "definition", title: "Definition", content: "Two statements S₁ and S₂ are <strong>logically equivalent</strong> (denoted S₁ ≡ S₂) if they have the same truth table, or equivalently, S₁ ↔ S₂ is a tautology." },
+                            { type: "text", content: "Equivalence can be established by constructing truth tables or by applying equivalence laws. Here are the key laws:" },
+                            { type: "code", content: "Identity Laws:    P ∧ T ≡ P,  P ∨ F ≡ P\nDomination Laws:  P ∨ T ≡ T,  P ∧ F ≡ F\nIdempotent Laws:  P ∧ P ≡ P,  P ∨ P ≡ P\nDouble Negation:  ¬(¬P) ≡ P\nCommutative:      P ∧ Q ≡ Q ∧ P,  P ∨ Q ≡ Q ∨ P\nAssociative:      P ∧ (Q ∧ R) ≡ (P ∧ Q) ∧ R\nDistributive:     P ∧ (Q ∨ R) ≡ (P ∧ Q) ∨ (P ∧ R)\nDe Morgan's:      ¬(P ∧ Q) ≡ ¬P ∨ ¬Q,  ¬(P ∨ Q) ≡ ¬P ∧ ¬Q\nImplication:      P → Q ≡ ¬P ∨ Q" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "Each logical connective has a precise truth table definition.",
+                        "Implication (→) is only false when P=true and Q=false.",
+                        "Operator precedence: ¬ > ∧ > ∨ > → > ↔.",
+                        "Two statements are equivalent if their truth tables match.",
+                        "De Morgan's laws are essential for simplification and proof."
+                    ],
+                    quiz: [
+                        { q: "P → Q is false when:", options: ["P=T, Q=T", "P=T, Q=F", "P=F, Q=T", "P=F, Q=F"],
+                            correct: 1 },
+                        { q: "Which law states that ¬(P ∧ Q) ≡ ¬P ∨ ¬Q?", options: ["Identity law", "De Morgan's law",
+                                "Distributive law", "Idempotent law"
+                            ], correct: 1 },
+                        { q: "P ⊕ Q is true when:", options: ["Both P and Q are true", "Both P and Q are false",
+                                "P and Q have different truth values", "Always true"
+                            ], correct: 2 },
+                        { q: "What is the highest precedence among these operators?", options: ["∧", "∨", "→", "¬"],
+                            correct: 3 }
+                    ]
+                }, {
+                    id: "ch3",
+                    number: "03",
+                    title: "Propositional Functions & Quantifiers",
+                    icon: "∀",
+                    overview: "Predicates, universal and existential quantifiers, counterexamples, negation rules, and nested quantifiers.",
+                    sections: [
+                        { id: "ch3-s1", title: "Propositional Functions (Predicates)", subsections: [
+                            { type: "text", content: "A <strong>propositional function</strong> (or predicate) is a statement involving one or more variables. We write P(x) where P is the predicate and x is the variable." },
+                            { type: "code", content: "P(x): x - 3 > 5\n\nP(2) → 2 - 3 > 5 → false\nP(9) → 9 - 3 > 5 → true" }
+                        ]},
+                        { id: "ch3-s2", title: "Universal Quantifier (∀)", subsections: [
+                            { type: "text", content: "The universal quantifier ∀ means \"for all\" or \"for every.\" ∀x P(x) asserts that P(x) is true for <strong>every</strong> x in the universe of discourse." },
+                            { type: "example", title: "Example", content: "Let S(x): \"x is a student.\" Let G(x): \"x is a genius.\"<br>∀x (S(x) → G(x)) means \"All students are geniuses.\"" },
+                            { type: "real-world", title: "In Programming", content: "This is like a <code>for</code> loop that checks a condition on every element of an array. <code>array.every(x => x > 0)</code> — checks if ALL elements are positive." }
+                        ]},
+                        { id: "ch3-s3", title: "Existential Quantifier (∃)", subsections: [
+                            { type: "text", content: "The existential quantifier ∃ means \"there exists\" or \"there is at least one.\" ∃x P(x) asserts that P(x) is true for <strong>at least one</strong> x." },
+                            { type: "example", title: "Example", content: "∃x (P(x) ∧ G(x)) means \"There exists an x such that x is a professor and x is a genius.\"" },
+                            { type: "real-world", title: "In Programming", content: "This is like <code>array.some(x => x > 0)</code> — checks if AT LEAST ONE element satisfies the condition." }
+                        ]},
+                        { id: "ch3-s4", title: "Disproof by Counterexample", subsections: [
+                            { type: "text", content: "To disprove a universal statement ∀x P(x), you only need to find <strong>one counterexample</strong> — an object c where P(c) is false." },
+                            { type: "example", title: "Classic Example", content: "Statement: \"All birds can fly.\"<br>Counterexample: A penguin is a bird that cannot fly.<br>Therefore, the statement is false." }
+                        ]},
+                        { id: "ch3-s5", title: "Negation of Quantifiers", subsections: [
+                            { type: "text", content: "De Morgan's laws extend to quantifiers:" },
+                            { type: "code", content: "¬(∀x P(x)) ≡ ∃x (¬P(x))\n¬(∃x P(x)) ≡ ∀x (¬P(x))" },
+                            { type: "example", title: "Examples", content: "\"Not all roses are red\" → ¬∀x(Rose(x) → Red(x)) ≡ ∃x(Rose(x) ∧ ¬Red(x))<br>\"Nobody is perfect\" → ¬∃x(Person(x) ∧ Perfect(x)) ≡ ∀x(Person(x) → ¬Perfect(x))" }
+                        ]},
+                        { id: "ch3-s6", title: "Nested Quantifiers", subsections: [
+                            { type: "text", content: "Predicates can have multiple variables, and we can quantify each variable independently." },
+                            { type: "example", title: "Example", content: "∀x ∃y (x + y = 320) — \"For every x, there exists a y such that x + y = 320.\"<br>This is true for real numbers, but false for natural numbers (e.g., x=500 would require y=-180, which is not natural)." },
+                            { type: "example", title: "Density of Rationals", content: "∀x,y (Q(x) ∧ Q(y) ∧ (x < y) → ∃u (Q(u) ∧ (x < u) ∧ (u < y)))<br>\"There is a rational number between every pair of distinct rational numbers.\"" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "Predicates are statements with variables; they become propositions when variables are instantiated.",
+                        "∀ means 'for all' — like checking every element in a collection.",
+                        "∃ means 'there exists' — like checking if at least one element satisfies a condition.",
+                        "A single counterexample disproves a universal statement.",
+                        "Negation of quantifiers follows De Morgan's laws.",
+                        "Nested quantifiers allow expressing complex relationships."
+                    ],
+                    quiz: [
+                        { q: "∀x P(x) asserts that:", options: ["P(x) is true for at least one x",
+                                "P(x) is true for every x", "P(x) is false for every x",
+                                "P(x) depends on x"
+                            ], correct: 1 },
+                        { q: "The negation of ∃x P(x) is:", options: ["∃x ¬P(x)", "∀x ¬P(x)", "¬∃x ¬P(x)",
+                                "∀x P(x)"
+                            ], correct: 1 },
+                        { q: "Which provides a counterexample to 'All birds can fly'?", options: ["Eagle", "Penguin",
+                                "Sparrow", "Falcon"
+                            ], correct: 1 },
+                        { q: "∀x ∃y (x + y = 320) is true for:", options: ["Natural numbers only",
+                                "Real numbers only", "Both natural and real numbers", "Neither"
+                            ], correct: 1 }
+                    ]
+                }, {
+                    id: "ch4",
+                    number: "04",
+                    title: "Set Theory",
+                    icon: "∅",
+                    overview: "Sets, membership, equality, subsets, cardinality, power sets, Cartesian products, and set operations.",
+                    sections: [
+                        { id: "ch4-s1", title: "What is a Set?", subsections: [
+                            { type: "text", content: "A <strong>set</strong> is an unordered collection of distinct objects, called <strong>elements</strong>. We write a ∈ A to denote \"a is an element of A\" and a ∉ A for \"a is not an element of A.\"" },
+                            { type: "code", content: "A = {9, 2, 7, -3}    // Set of numbers\nB = {dog, cat, horse}  // Set of animals\nC = ∅                 // Empty set (null set)" }
+                        ]},
+                        { id: "ch4-s2", title: "Set Equality", subsections: [
+                            { type: "text", content: "Sets A and B are <strong>equal</strong> if and only if they contain exactly the same elements. Order does not matter, and duplicates are ignored." },
+                            { type: "example", title: "Example", content: "A = {9, 2, 7, -3}, B = {7, 9, -3, 2} → A = B ✓<br>A = {dog, cat}, B = {cat, squirrel} → A ≠ B ✗" }
+                        ]},
+                        { id: "ch4-s3", title: "Common Number Sets", subsections: [
+                            { type: "code", content: "ℕ  = {0, 1, 2, 3, ...}       Natural numbers\nℤ  = {..., -2, -1, 0, 1, 2, ...}  Integers\nℤ⁺ = {1, 2, 3, 4, ...}       Positive integers\nℚ  = {a/b | a ∈ ℤ, b ∈ ℤ⁺}  Rational numbers\nℝ  = all real numbers\n∅  = {}                    Empty set" }
+                        ]},
+                        { id: "ch4-s4", title: "Subsets", subsections: [
+                            { type: "definition", title: "Subset (⊆)", content: "A ⊆ B means every element of A is also an element of B.<br>Formally: A ⊆ B ⇔ ∀x(x ∈ A → x ∈ B)" },
+                            { type: "definition", title: "Proper Subset (⊂)", content: "A ⊂ B means A ⊆ B but A ≠ B. There exists at least one element in B not in A." },
+                            { type: "code", content: "A = {1, 2}, B = {1, 2, 3}\nA ⊆ B ✓, A ⊂ B ✓, B ⊄ A\n\nUseful rules:\n• A = B ⇔ (A ⊆ B) ∧ (B ⊆ A)\n• (A ⊆ B) ∧ (B ⊆ C) → A ⊆ C\n• ∅ ⊆ A for any set A\n• A ⊆ A for any set A" }
+                        ]},
+                        { id: "ch4-s5", title: "Cardinality", subsections: [
+                            { type: "text", content: "The <strong>cardinality</strong> of a finite set is the number of distinct elements it contains, denoted |S|." },
+                            { type: "example", title: "Examples", content: "|{Mercedes, BMW, Porsche}| = 3<br>|∅| = 0<br>|{a, b, c, d}| = 4" }
+                        ]},
+                        { id: "ch4-s6", title: "Power Set", subsections: [
+                            { type: "definition", title: "Power Set P(A)", content: "The power set of A, denoted P(A) or 2ᴬ, is the set of all subsets of A (including ∅ and A itself)." },
+                            { type: "example", title: "Example", content: "A = {x, y}<br>P(A) = {∅, {x}, {y}, {x, y}}<br>|P(A)| = 2^|A| = 2² = 4<br><br>A = {x, y, z}<br>P(A) = {∅, {x}, {y}, {z}, {x,y}, {x,z}, {y,z}, {x,y,z}}<br>|P(A)| = 2³ = 8" },
+                            { type: "text", content: "<strong>Important:</strong> For any set A, |P(A)| = 2^|A|." }
+                        ]},
+                        { id: "ch4-s7", title: "Cartesian Product", subsections: [
+                            { type: "text", content: "A × B = {(a, b) | a ∈ A ∧ b ∈ B} — the set of all ordered pairs where the first element comes from A and the second from B." },
+                            { type: "example", title: "Example", content: "A = {1, 2}, B = {x, y}<br>A × B = {(1,x), (1,y), (2,x), (2,y)}<br>|A × B| = |A| × |B| = 2 × 2 = 4" },
+                            { type: "text", content: "Note: A × ∅ = ∅, and for non-empty distinct sets, A × B ≠ B × A." }
+                        ]},
+                        { id: "ch4-s8", title: "Set Operations", subsections: [
+                            { type: "definition", title: "Union (∪)", content: "A ∪ B = {x | x ∈ A ∨ x ∈ B}<br>|A ∪ B| = |A| + |B| - |A ∩ B|" },
+                            { type: "definition", title: "Intersection (∩)", content: "A ∩ B = {x | x ∈ A ∧ x ∈ B}" },
+                            { type: "definition", title: "Difference (−)", content: "A − B = {x | x ∈ A ∧ x ∉ B}<br>|A − B| = |A| - |A ∩ B|" },
+                            { type: "definition", title: "Complement (ᶜ)", content: "Aᶜ = U − A = {x | x ∉ A} (relative to universe U)" }
+                        ]},
+                        { id: "ch4-s9", title: "Set Identities", subsections: [
+                            { type: "code", content: "Identity:      A ∪ ∅ = A,  A ∩ U = A\nDomination:     A ∪ U = U,  A ∩ ∅ = ∅\nIdempotent:     A ∪ A = A,  A ∩ A = A\nDouble Comp:    (Aᶜ)ᶜ = A\nCommutative:    A ∪ B = B ∪ A,  A ∩ B = B ∩ A\nAssociative:    A ∪ (B ∪ C) = (A ∪ B) ∪ C\nDistributive:   A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)\nDe Morgan's:    (A ∪ B)ᶜ = Aᶜ ∩ Bᶜ,  (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ\nAbsorption:     A ∪ (A ∩ B) = A,  A ∩ (A ∪ B) = A\nComplement:     A ∪ Aᶜ = U,  A ∩ Aᶜ = ∅" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "Sets are unordered collections; duplicates and order are irrelevant.",
+                        "|P(A)| = 2^|A| for any set A.",
+                        "De Morgan's laws for sets mirror those for logic.",
+                        "The cardinality of a union requires subtracting the intersection to avoid double-counting.",
+                        "Set identities provide a powerful tool for proving set equalities."
+                    ],
+                    quiz: [
+                        { q: "What is |{a, b, a, c, b}|?", options: ["5", "3", "4", "2"], correct: 1 },
+                        { q: "If A = {1, 2, 3}, what is |P(A)|?", options: ["3", "6", "8", "9"], correct: 2 },
+                        { q: "A ∪ ∅ equals:", options: ["∅", "A", "U", "None of the above"], correct: 1 },
+                        { q: "If A ∩ B = ∅, then A and B are called:", options: ["Equal", "Disjoint", "Subsets",
+                                "Complementary"
+                            ], correct: 1 }
+                    ]
+                }, {
+                    id: "ch5",
+                    number: "05",
+                    title: "Functions",
+                    icon: "ƒ",
+                    overview: "Function definitions, injective/surjective/bijective properties, inverses, composition, and floor/ceiling functions.",
+                    sections: [
+                        { id: "ch5-s1", title: "What is a Function?", subsections: [
+                            { type: "definition", title: "Function", content: "A function f: A → B assigns <strong>exactly one</strong> element of B to each element of A. We write f(a) = b." },
+                            { type: "code", content: "f: A → B\nA = Domain (inputs)\nB = Codomain (possible outputs)\nRange = {f(a) | a ∈ A} ⊆ B" },
+                            { type: "real-world", title: "Real-World Analogy", content: "Think of a function as a vending machine. You put in a coin (input from domain A), and the machine gives you exactly one snack (output from codomain B). You can't get two snacks from one coin, and every coin must produce a result." }
+                        ]},
+                        { id: "ch5-s2", title: "Injective (One-to-One) Functions", subsections: [
+                            { type: "definition", title: "Injective", content: "A function is <strong>injective</strong> (one-to-one) if different inputs always produce different outputs.<br>Formally: ∀x,y ∈ A (f(x) = f(y) → x = y)" },
+                            { type: "example", title: "Example", content: "f(x) = 2x is injective (no two different x's give the same result).<br>f(x) = x² is NOT injective over ℝ (f(2) = f(-2) = 4)." }
+                        ]},
+                        { id: "ch5-s3", title: "Surjective (Onto) Functions", subsections: [
+                            { type: "definition", title: "Surjective", content: "A function is <strong>surjective</strong> (onto) if every element in the codomain is the image of at least one element in the domain.<br>Formally: ∀b ∈ B, ∃a ∈ A such that f(a) = b" },
+                            { type: "example", title: "Example", content: "f: ℝ → ℝ, f(x) = x³ is surjective (every real number can be obtained as a cube).<br>f: ℝ → ℝ, f(x) = x² is NOT surjective (negative numbers cannot be obtained)." }
+                        ]},
+                        { id: "ch5-s4", title: "Bijective Functions", subsections: [
+                            { type: "definition", title: "Bijection", content: "A function that is <strong>both injective and surjective</strong> is called a bijection (one-to-one correspondence)." },
+                            { type: "text", content: "If f is a bijection between finite sets A and B, then |A| = |B|. This gives us a powerful counting tool!" },
+                            { type: "example", title: "Example", content: "f: ℝ → ℝ, f(x) = 2x + 1 is bijective.<br>Every output corresponds to exactly one input: x = (y-1)/2." }
+                        ]},
+                        { id: "ch5-s5", title: "Inverse Functions", subsections: [
+                            { type: "definition", title: "Inverse", content: "The inverse of a bijection f: A → B is f⁻¹: B → A, where f⁻¹(b) = a ⇔ f(a) = b." },
+                            { type: "text", content: "<strong>Inversion is only possible for bijections.</strong> If a function is not one-to-one, you can't uniquely invert it. If it's not onto, some outputs have no pre-image." },
+                            { type: "example", title: "Example", content: "f(x) = 2x + 1 → f⁻¹(x) = (x - 1) / 2<br>Check: f(f⁻¹(x)) = 2((x-1)/2) + 1 = x ✓" }
+                        ]},
+                        { id: "ch5-s6", title: "Composition", subsections: [
+                            { type: "definition", title: "Composition (∘)", content: "Given g: A → B and f: B → C, the composition f ∘ g: A → C is defined as (f ∘ g)(a) = f(g(a))." },
+                            { type: "text", content: "Note: f ∘ g means \"apply g first, then apply f.\" Composition is not always commutative: f ∘ g ≠ g ∘ f in general." },
+                            { type: "text", content: "The composition of a function and its inverse is the identity function: f ∘ f⁻¹ = f⁻¹ ∘ f = i(x) = x." }
+                        ]},
+                        { id: "ch5-s7", title: "Floor and Ceiling Functions", subsections: [
+                            { type: "definition", title: "Floor ⌊r⌋", content: "The floor function gives the largest integer ≤ r. Example: ⌊3.7⌋ = 3, ⌊-2.1⌋ = -3" },
+                            { type: "definition", title: "Ceiling ⌈r⌉", content: "The ceiling function gives the smallest integer ≥ r. Example: ⌈3.2⌉ = 4, ⌈-2.1⌉ = -2" },
+                            { type: "real-world", title: "Practical Use", content: "In programming, floor division and ceiling are used for pagination (how many pages do we need?), resource allocation, and rounding operations." }
+                        ]}
+                    ],
+                    takeaways: [
+                        "A function maps each input to exactly one output.",
+                        "Injective: different inputs → different outputs.",
+                        "Surjective: every output has at least one input.",
+                        "Bijective: both injective and surjective — perfect one-to-one pairing.",
+                        "Only bijections have inverses.",
+                        "Floor/ceiling functions bridge real numbers and integers."
+                    ],
+                    quiz: [
+                        { q: "f(x) = x² (from ℝ to ℝ) is:", options: ["Injective", "Surjective", "Bijective",
+                                "Neither"
+                            ], correct: 3 },
+                        { q: "A bijection between finite sets A and B implies:", options: ["|A| > |B|", "|A| < |B|",
+                                "|A| = |B|", "No relationship"
+                            ], correct: 2 },
+                        { q: "⌊5.9⌋ = ?", options: ["5", "6", "5.9", "6.0"], correct: 0 },
+                        { q: "The inverse of f(x) = 3x is:", options: ["f⁻¹(x) = -3x", "f⁻¹(x) = x/3", "f⁻¹(x) = 3/x",
+                                "No inverse exists"
+                            ], correct: 1 }
+                    ]
+                }, {
+                    id: "ch6",
+                    number: "06",
+                    title: "Boolean Algebra",
+                    icon: "⊻",
+                    overview: "Boolean operations, functions, expressions, and their applications in electronic circuits.",
+                    sections: [
+                        { id: "ch6-s1", title: "Boolean Operations", subsections: [
+                            { type: "text", content: "Boolean algebra operates on the set {0, 1} with three fundamental operations:" },
+                            { type: "definition", title: "Boolean Complement (NOT)", content: "¬0 = 1, ¬1 = 0. Denoted by a bar: 0̄ = 1, 1̄ = 0." },
+                            { type: "definition", title: "Boolean Sum (OR)", content: "1 + 1 = 1, 1 + 0 = 1, 0 + 1 = 1, 0 + 0 = 0" },
+                            { type: "definition", title: "Boolean Product (AND)", content: "1 · 1 = 1, 1 · 0 = 0, 0 · 1 = 0, 0 · 0 = 0" },
+                            { type: "text", content: "Note that in Boolean algebra, 1 + 1 = 1 (unlike regular arithmetic where 1 + 1 = 2). This is because we're working with truth values, not quantities." }
+                        ]},
+                        { id: "ch6-s2", title: "Boolean Functions", subsections: [
+                            { type: "text", content: "Let B = {0, 1}. A Boolean variable is a variable that can only take values from B. A function from Bⁿ to B is called a <strong>Boolean function of degree n</strong>." },
+                            { type: "text", content: "There are 2ⁿ different n-tuples of 0s and 1s, and therefore <strong>2^(2ⁿ)</strong> different Boolean functions of degree n." },
+                            { type: "example", title: "Example", content: "For n = 2, there are 2^4 = 16 different Boolean functions.<br>For n = 3, there are 2^8 = 256 different Boolean functions.<br>For n = 1, there are 2^2 = 4: identity, negation, constant 0, constant 1." }
+                        ]},
+                        { id: "ch6-s3", title: "Boolean Algebra Properties", subsections: [
+                            { type: "text", content: "A Boolean algebra is a set B with operations ∨ (OR) and ∧ (AND), special elements 0 and 1, and a unary complement operation, satisfying these axioms:" },
+                            { type: "code", content: "Identity:      x ∨ 0 = x,  x ∧ 1 = x\nComplement:     x ∨ ¬x = 1,  x ∧ ¬x = 0\nAssociative:    x ∨ (y ∨ z) = (x ∨ y) ∨ z\n               x ∧ (y ∧ z) = (x ∧ y) ∧ z\nCommutative:    x ∨ y = y ∨ x,  x ∧ y = y ∧ x\nDistributive:   x ∧ (y ∨ z) = (x ∧ y) ∨ (x ∧ z)\n               x ∨ (y ∧ z) = (x ∨ y) ∧ (x ∨ z)" }
+                        ]},
+                        { id: "ch6-s4", title: "Logic Gates", subsections: [
+                            { type: "text", content: "Electronic circuits are built from three basic types of <strong>gates</strong>:" },
+                            { type: "code", content: "OR Gate:  Output = x + y  (Boolean sum)\nAND Gate: Output = x · y  (Boolean product)\nNOT Gate: Output = ¬x    (Inverter)" },
+                            { type: "real-world", title: "Application", content: "Every digital computer is built from billions of these basic gates. Your CPU, GPU, memory — all derived from Boolean algebra principles. Boolean expressions can be simplified to reduce the number of gates needed, saving power and space." },
+                            { type: "example", title: "Simplification Example", content: "Simplify x + (x · y):<br>x + xy = x(1 + y) = x · 1 = x<br>This means the circuit can be reduced to just a wire!" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "Boolean algebra works with {0, 1} using NOT, AND, and OR operations.",
+                        "1 + 1 = 1 in Boolean algebra (not 2).",
+                        "There are 2^(2ⁿ) Boolean functions of degree n.",
+                        "Logic gates implement Boolean operations in hardware.",
+                        "Boolean simplification reduces circuit complexity and cost."
+                    ],
+                    quiz: [
+                        { q: "In Boolean algebra, 1 + 1 = ?", options: ["2", "0", "1", "undefined"], correct: 2 },
+                        { q: "How many Boolean functions of degree 2 are there?", options: ["4", "8", "16", "32"],
+                            correct: 2 },
+                        { q: "Which gate implements Boolean sum?", options: ["AND gate", "OR gate", "NOT gate",
+                                "XOR gate"
+                            ], correct: 1 },
+                        { q: "x + xy simplifies to:", options: ["xy", "x", "y", "x + y"], correct: 1 }
+                    ]
+                }, {
+                    id: "ch7",
+                    number: "07",
+                    title: "Sequences & Summations",
+                    icon: "Σ",
+                    overview: "Sequences, summation notation, Gauss formula, geometric series, and common series formulas.",
+                    sections: [
+                        { id: "ch7-s1", title: "Sequences", subsections: [
+                            { type: "definition", title: "Sequence", content: "A sequence is a function from a subset of ℕ to a set S. We use aₙ to denote the image of integer n, called the n-th term." },
+                            { type: "example", title: "Examples", content: "1, 2, 3, 4, ... (natural numbers)<br>2, 4, 8, 16, ... (powers of 2)<br>1, 1, 2, 3, 5, 8, ... (Fibonacci sequence)" },
+                            { type: "text", content: "Finite sequences are called <strong>strings</strong>. The empty string has length zero and contains no terms." }
+                        ]},
+                        { id: "ch7-s2", title: "Summation Notation", subsections: [
+                            { type: "text", content: "The summation notation Σ represents the sum of terms from a lower limit to an upper limit. The variable is called the <strong>index of summation</strong>." },
+                            { type: "code", content: "Σ(j=m to n) aⱼ = aₘ + aₘ₊₁ + ... + aₙ\n\nExample:\nΣ(j=1 to 5) j = 1 + 2 + 3 + 4 + 5 = 15" }
+                        ]},
+                        { id: "ch7-s3", title: "Gauss Formula", subsections: [
+                            { type: "definition", title: "Gauss Formula", content: "Σ(j=1 to n) j = n(n+1)/2" },
+                            { type: "example", title: "Example", content: "1 + 2 + 3 + ... + 100 = 100 × 101 / 2 = 5050<br>1 + 2 + 3 + ... + 1000 = 1000 × 1001 / 2 = 500500" },
+                            { type: "real-world", title: "Story", content: "The famous mathematician Carl Friedrich Gauss discovered this formula as a child. His teacher asked the class to add 1 to 100, expecting to keep them busy. Gauss paired numbers (1+100, 2+99, etc.) and arrived at the answer in minutes." }
+                        ]},
+                        { id: "ch7-s4", title: "Geometric Series", subsections: [
+                            { type: "definition", title: "Geometric Series Formula", content: "1 + a + a² + ... + aⁿ = (aⁿ⁺¹ - 1) / (a - 1), for a ≠ 1" },
+                            { type: "example", title: "Example", content: "1 + 2 + 4 + 8 + ... + 64 = (2⁷ - 1) / (2 - 1) = 127<br>1 + 0.5 + 0.25 + ... = 1 / (1 - 0.5) = 2 (infinite series)" }
+                        ]},
+                        { id: "ch7-s5", title: "Useful Series Formulas", subsections: [
+                            { type: "code", content: "Σ j = n(n+1)/2\nΣ j² = n(n+1)(2n+1)/6\nΣ j³ = n²(n+1)²/4\nΣ aʲ = (aⁿ⁺¹ - 1)/(a - 1)" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "Sequences are functions from natural numbers to a set.",
+                        "Gauss formula: Σj = n(n+1)/2.",
+                        "Geometric series: Σaʲ = (aⁿ⁺¹-1)/(a-1).",
+                        "Summation notation provides a compact way to represent sums.",
+                        "These formulas are essential for algorithm analysis."
+                    ],
+                    quiz: [
+                        { q: "What is 1 + 2 + 3 + ... + 100?", options: ["5000", "5050", "5100", "4950"], correct: 1 },
+                        { q: "What is the sum of the geometric series 1 + 3 + 9 + 27?", options: ["40", "30", "36",
+                                "44"
+                            ], correct: 0 },
+                        { q: "Σ(j=1 to n) j² = ?", options: ["n(n+1)/2", "n(n+1)(2n+1)/6", "n²(n+1)²/4",
+                                "n(n+1)/6"
+                            ], correct: 1 },
+                        { q: "The empty string has length:", options: ["1", "0", "undefined", "negative"], correct: 1 }
+                    ]
+                }, {
+                    id: "ch8",
+                    number: "08",
+                    title: "Mathematical Induction",
+                    icon: "🔗",
+                    overview: "The principle of mathematical induction for proving statements about natural numbers.",
+                    sections: [
+                        { id: "ch8-s1", title: "The Principle of Induction", subsections: [
+                            { type: "text", content: "Mathematical induction is a powerful proof technique for proving that a predicate P(n) is true for all natural numbers. It works like dominoes: knock down the first one, and ensure each domino knocks down the next." },
+                            { type: "code", content: "To prove P(n) is true for all n ∈ ℕ:\n\n1. BASIS STEP:   Show P(0) or P(1) is true.\n2. INDUCTIVE STEP: Show that if P(n) is true,\n   then P(n+1) must also be true (for any n).\n3. CONCLUSION: P(n) is true for all n ∈ ℕ." }
+                        ]},
+                        { id: "ch8-s2", title: "How Induction Works", subsections: [
+                            { type: "text", content: "Think of an infinite row of dominoes. If you knock down the first domino (basis step), and you've verified that each domino falling will knock down the next one (inductive step), then all dominoes will fall." },
+                            { type: "text", content: "The key insight: induction <strong>proves</strong> theorems but does not <strong>discover</strong> them. You need to have a conjecture first, then use induction to verify it." }
+                        ]},
+                        { id: "ch8-s3", title: "Example Proof by Induction", subsections: [
+                            { type: "example", title: "Prove: 1 + 2 + 3 + ... + n = n(n+1)/2", content: "<strong>Basis Step (n=1):</strong> LHS = 1, RHS = 1(2)/2 = 1 ✓<br><br><strong>Inductive Step:</strong> Assume P(k): 1 + 2 + ... + k = k(k+1)/2<br>Show P(k+1): 1 + 2 + ... + k + (k+1) = (k+1)(k+2)/2<br><br>LHS = [1 + 2 + ... + k] + (k+1)<br>= k(k+1)/2 + (k+1)  [using inductive hypothesis]<br>= (k+1)(k/2 + 1)<br>= (k+1)(k+2)/2 = RHS ✓<br><br>Therefore, by induction, the formula holds for all n ∈ ℕ." }
+                        ]},
+                        { id: "ch8-s4", title: "Tutorial Examples", subsections: [
+                            { type: "text", content: "Additional exercises from the tutorial:" },
+                            { type: "example", title: "Quantifier Practice", content: "P(x): \"x + 1 > x\" → ∀x P(x) is TRUE for real numbers.<br>Q(x): \"x < 2\" → ∀x Q(x) is FALSE (counterexample: x = 3).<br>P(x): \"x > 3\" → ∃x P(x) is TRUE (e.g., x = 4).<br>Q(x): \"x = x + 1\" → ∃x Q(x) is FALSE (no solution)." },
+                            { type: "example", title: "Negation Practice", content: "\"There is an honest politician\" = ∃x H(x)<br>Negation: ¬∃x H(x) ≡ ∀x ¬H(x) = \"Every politician is dishonest.\"<br><br>De Morgan's Laws for Quantifiers:<br>¬∃x P(x) ≡ ∀x ¬P(x)<br>¬∀x P(x) ≡ ∃x ¬P(x)" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "Induction is a two-step process: basis + inductive step.",
+                        "It proves statements for ALL natural numbers, not just a few cases.",
+                        "The inductive hypothesis is the key to the inductive step.",
+                        "Induction works because natural numbers are well-ordered.",
+                        "It's a verification tool, not a discovery tool."
+                    ],
+                    quiz: [
+                        { q: "The basis step of induction typically proves:", options: ["P(n) for all n", "P(0) or P(1)",
+                                "P(n) → P(n+1)", "None of the above"
+                            ], correct: 1 },
+                        { q: "In the inductive step, we assume:", options: ["P(n+1) is true", "P(n) is true",
+                                "P(0) is true", "Nothing"
+                            ], correct: 1 },
+                        { q: "The negation of ∃x P(x) is:", options: ["∀x ¬P(x)", "∃x ¬P(x)", "¬∀x P(x)",
+                                "None"
+                            ], correct: 0 },
+                        { q: "Induction can be used to:", options: ["Discover new theorems", "Prove existing conjectures",
+                                "Find counterexamples", "All of the above"
+                            ], correct: 1 }
+                    ]
+                }]
+            },
+            ar: {
+                app_title: "الرياضيات المتقطعة",
+                app_subtitle: "دليل دراسي تفاعلي",
+                search_placeholder: "ابحث في المواضيع...",
+                lang_toggle: "English",
+                grading_note: "التقييم: الواجبات 40% · الاختبار النصفي 20% · النهائي 40%",
+                footer_text: "الرياضيات المتقطعة — منصة دراسية تفاعلية. مبنية للتعلم العميق.",
+                footer_rights: "جميع الحقوق محفوظة",
+                breadcrumb_home: "الرئيسية",
+                chapters: [{
+                    id: "ch1",
+                    number: "01",
+                    title: "مقدمة في المنطق الرياضي (Mathematical Logic)",
+                    icon: "🧠",
+                    overview: "أساسيات المنطق الاقتراحي: القضايا، العبارات، قيم الصحة، والقضايا المفتوحة.",
+                    sections: [
+                        { id: "ch1-s1", title: "ما هو المنطق؟ (What is Logic?)", subsections: [
+                            { type: "text", content: "المنطق هو الدراسة المنهجية للاستدلال الصحيح. في علوم الحاسوب والرياضيات، يشكل العمود الفقري لتصميم البرامج، وتصميم الدوائر الإلكترونية، والتحقق الرسمي. يتعامل المنطق الاقتراحي (Propositional Logic) مع العبارات التي تكون إما صحيحة أو خاطئة — بدون غموض." },
+                            { type: "definition", title: "تعريف: القضية (Proposition)", content: "القضية (Proposition) هي جملة خبرية تكون إما <strong>صحيحة (T)</strong> أو <strong>خاطئة (F)</strong>، ولكن ليس كلاهما معًا." },
+                            { type: "real-world", title: "تطبيق عملي", content: "عندما تكتب جملة <code>if</code> في البرمجة، يكون الشرط داخل الأقواس قضية. مثلاً: <code>if (age >= 18)</code> — التعبير <code>age >= 18</code> يُقيَّم إما صحيح أو خاطئ. هذا بالضبط ما يُصيغه المنطق الاقتراحي." }
+                        ]},
+                        { id: "ch1-s2", title: "لعبة العبارة/القضية", subsections: [
+                            { type: "text", content: "دعنا نحلل عدة جمل لتحديد ما إذا كانت تُعتبر قضايا:" },
+                            { type: "example", title: "تحليل أمثلة", content: "<ul style='list-style:disc;padding-left:24px;margin:8px 0;'><li>\"الفيلة أكبر من الفئران.\" → <strong>قضية</strong> (صحيحة)</li><li>\"520 < 111\" → <strong>قضية</strong> (خاطئة)</li><li>\"y > 5\" → <strong>ليست قضية</strong> (تعتمد على قيمة y — تُسمى جملة مفتوحة)</li><li>\"من فضلك لا تنم.\" → <strong>ليست قضية</strong> (طلب وليس خبرًا)</li><li>\"x < y إذا وفقط إذا كان y > x\" → <strong>قضية</strong> (صحيحة دائمًا)</li></ul>" },
+                            { type: "key-takeaway", content: "فقط الجمل الخبرية ذات قيمة حقيقة محددة تُعتبر قضايا. الأسئلة والأوامر والتعجبات والجمل ذات المتغيرات غير المحددة <strong>ليست</strong> قضايا." }
+                        ]},
+                        { id: "ch1-s3", title: "القضايا المفتوحة (Open Propositions)", subsections: [
+                            { type: "text", content: "القضية المفتوحة (Open Proposition) أو المسند (Predicate) هي عبارة تحتوي على متغير واحد أو أكثر. تعتمد قيمة صحتها على قيمة المتغير." },
+                            { type: "code", content: "P(x): x - 3 > 5\n\nP(2)  → 2 - 3 > 5  →  -1 > 5  →  خاطئ\nP(8)  → 8 - 3 > 5  →  5 > 5   →  خاطئ\nP(9)  → 9 - 3 > 5  →  6 > 5   →  صحيح" },
+                            { type: "text", content: "عندما نُعيِّن قيمة محددة للمتغير (مثلاً x = 9)، نقول إن المتغير تم <strong>إسناده</strong>، وتصبح القضية المفتوحة قضية مغلقة ذات قيمة حقيقة محددة." }
+                        ]},
+                        { id: "ch1-s4", title: "دمج القضايا (Combining Propositions)", subsections: [
+                            { type: "text", content: "كما ندمج الأرقام بالعمليات الحسابية (+، -، ×، ÷)، ندمج القضايا باستخدام <strong>الروابط المنطقية (Logical Connectives)</strong>. نرمز للقضايا بالحروف: p, q, r, s, ..." },
+                            { type: "text", content: "الروابط الستة الأساسية التي سندرسها هي: <strong>النفي (Negation)</strong>، <strong>العطف (Conjunction)</strong>، <strong>الفصل (Disjunction)</strong>، <strong>الفصل الحصري (Exclusive-Or)</strong>، <strong>الاستلزام (Implication)</strong>، <strong>التكافؤ (Biconditional)</strong>. لكل منها جدول حقيقة دقيق." }
+                        ]}
+                    ],
+                    takeaways: [
+                        "القضية هي جملة خبرية إما صحيحة أو خاطئة.",
+                        "الجمل المفتوحة تحتوي على متغيرات وليست قضايا حتى تُسنَد.",
+                        "يمكن دمج القضايا باستخدام الروابط المنطقية لتكوين قضايا مركبة.",
+                        "قيم الصحة في المنطق تقابل 1 (صحيح) و0 (خاطئ) في الدوائر الرقمية."
+                    ],
+                    quiz: [
+                        { q: "أي مما يلي يُعتبر قضية (Proposition)؟", options: ["\"من فضلك أغلق الباب.\"", "\"x + 2 = 7\"",
+                                "\"الشمس تشرق من الشرق.\"", "\"هل تمطر؟\""
+                            ], correct: 2 },
+                        { q: "ما قيمة صحة العبارة \"520 < 111\"؟", options: ["صحيحة", "خاطئة", "تعتمد على المتغير",
+                                "ليست قضية"
+                            ], correct: 1 },
+                        { q: "\"y > 5\" تُصنف على أنها:", options: ["قضية", "قضية مفتوحة", "طوطولوجيا", "تناقض"],
+                            correct: 1 },
+                        { q: "في الدوائر الرقمية، قيمة الصحة 'صحيح' تقابل أي رقم؟", options: ["0", "1", "2", "غير محدد"],
+                            correct: 1 }
+                    ]
+                }, {
+                    id: "ch2",
+                    number: "02",
+                    title: "الروابط المنطقية (Logical Operators)",
+                    icon: "⚡",
+                    overview: "جداول الحقيقة الكاملة للروابط المنطقية الستة، أسبقية العوامل، الطوطولوجيا والتناقض، وقوانين التكافؤ.",
+                    sections: [
+                        { id: "ch2-s1", title: "النفي (Negation) — ¬", subsections: [
+                            { type: "text", content: "النفي هو <strong>عامل أحادي</strong> يقلب قيمة صحة القضية. إذا كانت p صحيحة، فإن ¬p خاطئة والعكس صحيح." },
+                            { type: "truth-table", headers: ["P", "¬P"], rows: [
+                                ["T", "F"],
+                                ["F", "T"]
+                            ] },
+                            { type: "example", title: "مثال", content: "P: \"إنها تمطر.\" → ¬P: \"إنها لا تمطر.\"" }
+                        ]},
+                        { id: "ch2-s2", title: "العطف (Conjunction) — ∧", subsections: [
+                            { type: "text", content: "العطف هو <strong>عامل ثنائي</strong>. يكون P ∧ Q صحيحًا فقط عندما يكون <strong>كلاهما</strong> P و Q صحيحين." },
+                            { type: "truth-table", headers: ["P", "Q", "P ∧ Q"], rows: [
+                                ["T", "T", "T"],
+                                ["T", "F", "F"],
+                                ["F", "T", "F"],
+                                ["F", "F", "F"]
+                            ] },
+                            { type: "real-world", title: "في البرمجة", content: "هذا هو العامل <code>&&</code>. <code>if (isLoggedIn && hasPermission)</code> — يجب أن يكون كلا الشرطين صحيحًا لتنفيذ الكود." }
+                        ]},
+                        { id: "ch2-s3", title: "الفصل (Disjunction) — ∨", subsections: [
+                            { type: "text", content: "الفصل هو <strong>عامل ثنائي</strong>. يكون P ∨ Q صحيحًا عندما يكون <strong>واحد على الأقل</strong> من P أو Q صحيحًا. (أو شامل)" },
+                            { type: "truth-table", headers: ["P", "Q", "P ∨ Q"], rows: [
+                                ["T", "T", "T"],
+                                ["T", "F", "T"],
+                                ["F", "T", "T"],
+                                ["F", "F", "F"]
+                            ] },
+                            { type: "real-world", title: "استخدام عملي", content: "في نظام تسجيل الدخول: \"يُمنح الوصول إذا كان المستخدم مديرًا أو مستخدمًا مميزًا.\" هذا أو شامل — إذا كان كلاهما صحيحًا، يظل الوصول ممنوحًا." }
+                        ]},
+                        { id: "ch2-s4", title: "الفصل الحصري (XOR) — ⊕", subsections: [
+                            { type: "text", content: "يكون XOR صحيحًا عندما يكون <strong>واحد فقط</strong> من المدخلات صحيحًا — ليس كلاهما." },
+                            { type: "truth-table", headers: ["P", "Q", "P ⊕ Q"], rows: [
+                                ["T", "T", "F"],
+                                ["T", "F", "T"],
+                                ["F", "T", "T"],
+                                ["F", "F", "F"]
+                            ] },
+                            { type: "example", title: "غموض اللغة الطبيعية", content: "\"تحصل على 2000$ نقدًا أو قرض سيارة بنسبة 2%.\" في اللغة الطبيعية، يُفهم هذا عادةً على أنه XOR — تحصل على أحدهما أو الآخر، وليس كليهما. لهذا نحتاج إلى تدوين منطقي دقيق لإزالة الغموض." }
+                        ]},
+                        { id: "ch2-s5", title: "الاستلزام (Implication) — →", subsections: [
+                            { type: "text", content: "الاستلزام هو الرابط الأكثر دقة. P → Q يعني \"إذا P فإن Q.\" يكون <strong>خاطئًا فقط عندما تكون P صحيحة و Q خاطئة</strong>. في جميع الحالات الأخرى يكون صحيحًا." },
+                            { type: "truth-table", headers: ["P", "Q", "P → Q"], rows: [
+                                ["T", "T", "T"],
+                                ["T", "F", "F"],
+                                ["F", "T", "T"],
+                                ["F", "F", "T"]
+                            ] },
+                            { type: "example", title: "فهم المنطق", content: "\"إذا أمطرت، تبلل الأرض.\" (P → Q)<br>• إذا أمطرت وتبللت الأرض → صحيح (P=T, Q=T)<br>• إذا أمطرت ولم تبلل الأرض → خاطئ (P=T, Q=F) — الاستلزام انتهك!<br>• إذا لم تمطر، الاستلزام لا يقول شيئًا عن الأرض (P=F → دائمًا صحيح)" },
+                            { type: "key-takeaway", content: "P → Q ≡ ¬P ∨ Q. الاستلزام خاطئ فقط عندما يكون المقدم صحيحًا والتالي خاطئًا." }
+                        ]},
+                        { id: "ch2-s6", title: "التكافؤ (Biconditional) — ↔", subsections: [
+                            { type: "text", content: "P ↔ Q يعني \"P إذا وفقط إذا Q.\" يكون صحيحًا عندما يكون لـ P و Q <strong>نفس</strong> قيمة الصحة." },
+                            { type: "truth-table", headers: ["P", "Q", "P ↔ Q"], rows: [
+                                ["T", "T", "T"],
+                                ["T", "F", "F"],
+                                ["F", "T", "F"],
+                                ["F", "F", "T"]
+                            ] },
+                            { type: "text", content: "ملاحظة: P ↔ Q ≡ (P → Q) ∧ (Q → P)." }
+                        ]},
+                        { id: "ch2-s7", title: "أسبقية العوامل (Operator Precedence)", subsections: [
+                            { type: "text", content: "عند وجود عدة عوامل في تعبير، تُقيَّم بهذا الترتيب (من الأعلى إلى الأدنى):" },
+                            { type: "code", content: "1. ¬  (النفي)\n2. ∧  (العطف)\n3. ∨  (الفصل)\n4. →  (الاستلزام)\n5. ↔  (التكافؤ)" },
+                            { type: "example", title: "مثال", content: "¬P ∧ Q ∨ R → S تُقرأ كـ: (((¬P) ∧ Q) ∨ R) → S" }
+                        ]},
+                        { id: "ch2-s8", title: "الطوطولوجيا والتناقض (Tautologies & Contradictions)", subsections: [
+                            { type: "definition", title: "الطوطولوجيا (Tautology)", content: "عبارة <strong>صحيحة دائمًا</strong> بغض النظر عن قيم مكوناتها. مثال: P ∨ ¬P" },
+                            { type: "definition", title: "التناقض (Contradiction)", content: "عبارة <strong>خاطئة دائمًا</strong> بغض النظر عن قيم مكوناتها. مثال: P ∧ ¬P" },
+                            { type: "text", content: "نفي أي طوطولوجيا هو تناقض، ونفي أي تناقض هو طوطولوجيا." }
+                        ]},
+                        { id: "ch2-s9", title: "التكافؤ المنطقي (Logical Equivalence)", subsections: [
+                            { type: "definition", title: "تعريف", content: "عبارتان S₁ و S₂ <strong>متكافئتان منطقيًا</strong> (يُرمز له S₁ ≡ S₂) إذا كان لهما نفس جدول الحقيقة، أو بالتكافؤ، S₁ ↔ S₂ طوطولوجيا." },
+                            { type: "text", content: "يمكن إثبات التكافؤ ببناء جداول الحقيقة أو باستخدام قوانين التكافؤ. إليك القوانين الأساسية:" },
+                            { type: "code", content: "قوانين الهوية:       P ∧ T ≡ P,  P ∨ F ≡ P\nقوانين السيطرة:       P ∨ T ≡ T,  P ∧ F ≡ F\nقوانين التكرار:       P ∧ P ≡ P,  P ∨ P ≡ P\nالنفي المزدوج:         ¬(¬P) ≡ P\nالتبديل:              P ∧ Q ≡ Q ∧ P,  P ∨ Q ≡ Q ∨ P\nالدمج:                P ∧ (Q ∧ R) ≡ (P ∧ Q) ∧ R\nالتوزيع:              P ∧ (Q ∨ R) ≡ (P ∧ Q) ∨ (P ∧ R)\nدي مورغان:             ¬(P ∧ Q) ≡ ¬P ∨ ¬Q,  ¬(P ∨ Q) ≡ ¬P ∧ ¬Q\nالاستلزام:             P → Q ≡ ¬P ∨ Q" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "لكل رابط منطقي تعريف دقيق بجدول الحقيقة.",
+                        "الاستلزام (→) خاطئ فقط عندما يكون P صحيحًا و Q خاطئًا.",
+                        "أسبقية العوامل: ¬ > ∧ > ∨ > → > ↔.",
+                        "عبارتان متكافئتان إذا تطابقت جداول حقيقتهما.",
+                        "قوانين دي مورغان أساسية للتبسيط والإثبات."
+                    ],
+                    quiz: [
+                        { q: "P → Q خاطئة عندما:", options: ["P=T, Q=T", "P=T, Q=F", "P=F, Q=T", "P=F, Q=F"],
+                            correct: 1 },
+                        { q: "أي قانون ينص على أن ¬(P ∧ Q) ≡ ¬P ∨ ¬Q؟", options: ["قانون الهوية", "قانون دي مورغان",
+                                "قانون التوزيع", "قانون التكرار"
+                            ], correct: 1 },
+                        { q: "P ⊕ Q صحيحة عندما:", options: ["كلاهما صحيح", "كلاهما خاطئ",
+                                "P و Q لهما قيمتان مختلفتان", "دائمًا صحيحة"
+                            ], correct: 2 },
+                        { q: "ما أعلى أسبقية بين هذه العوامل؟", options: ["∧", "∨", "→", "¬"], correct: 3 }
+                    ]
+                }, {
+                    id: "ch3",
+                    number: "03",
+                    title: "الدوال الاقتراحية والمكممات (Predicates & Quantifiers)",
+                    icon: "∀",
+                    overview: "المسندات، المكمم الشامل والوجودي، الأمثلة المضادة، قواعد النفي، والمكممات المتداخلة.",
+                    sections: [
+                        { id: "ch3-s1", title: "الدوال الاقتراحية (Predicates)", subsections: [
+                            { type: "text", content: "الدالة الاقتراحية (Predicate) هي عبارة تحتوي على متغير واحد أو أكثر. نكتب P(x) حيث P هو المسند و x هو المتغير." },
+                            { type: "code", content: "P(x): x - 3 > 5\n\nP(2) → 2 - 3 > 5 → خاطئ\nP(9) → 9 - 3 > 5 → صحيح" }
+                        ]},
+                        { id: "ch3-s2", title: "المكمم الشامل (∀)", subsections: [
+                            { type: "text", content: "المكمم الشامل ∀ يعني \"للجميع\" أو \"لكل.\" ∀x P(x) يؤكد أن P(x) صحيحة <strong>لكل</strong> x في مجال الخطاب." },
+                            { type: "example", title: "مثال", content: "لنفرض S(x): \"x طالب.\" و G(x): \"x عبقري.\"<br>∀x (S(x) → G(x)) تعني \"جميع الطلاب عباقرة.\"" },
+                            { type: "real-world", title: "في البرمجة", content: "هذا مثل حلقة <code>for</code> التي تفحص شرطًا على كل عنصر. <code>array.every(x => x > 0)</code> — يفحص إذا كانت جميع العناصر موجبة." }
+                        ]},
+                        { id: "ch3-s3", title: "المكمم الوجودي (∃)", subsections: [
+                            { type: "text", content: "المكمم الوجودي ∃ يعني \"يوجد\" أو \"هناك واحد على الأقل.\" ∃x P(x) يؤكد أن P(x) صحيحة <strong>لواحد على الأقل</strong> من x." },
+                            { type: "example", title: "مثال", content: "∃x (P(x) ∧ G(x)) تعني \"يوجد x بحيث يكون x أستاذًا و x عبقريًا.\"" },
+                            { type: "real-world", title: "في البرمجة", content: "هذا مثل <code>array.some(x => x > 0)</code> — يفحص إذا كان عنصر واحد على الأقل يحقق الشرط." }
+                        ]},
+                        { id: "ch3-s4", title: "الدحض بمثال مضاد (Disproof by Counterexample)", subsections: [
+                            { type: "text", content: "لدحض عبارة شاملة ∀x P(x)، يكفي إيجاد <strong>مثال مضاد واحد</strong> — عنصر c حيث P(c) خاطئة." },
+                            { type: "example", title: "مثال كلاسيكي", content: "العبارة: \"جميع الطيور تستطيع الطيران.\"<br>مثال مضاد: البطريق طائر لا يستطيع الطيران.<br>لذلك العبارة خاطئة." }
+                        ]},
+                        { id: "ch3-s5", title: "نفي المكممات (Negation of Quantifiers)", subsections: [
+                            { type: "text", content: "قوانين دي مورغان تمتد إلى المكممات:" },
+                            { type: "code", content: "¬(∀x P(x)) ≡ ∃x (¬P(x))\n¬(∃x P(x)) ≡ ∀x (¬P(x))" },
+                            { type: "example", title: "أمثلة", content: "\"ليس كل الورود حمراء\" → ¬∀x(Rose(x) → Red(x)) ≡ ∃x(Rose(x) ∧ ¬Red(x))<br>\"لا أحد مثالي\" → ¬∃x(Person(x) ∧ Perfect(x)) ≡ ∀x(Person(x) → ¬Perfect(x))" }
+                        ]},
+                        { id: "ch3-s6", title: "المكممات المتداخلة (Nested Quantifiers)", subsections: [
+                            { type: "text", content: "المسندات يمكن أن تحتوي على أكثر من متغير، ويمكننا تقييد كل متغير بشكل مستقل." },
+                            { type: "example", title: "مثال", content: "∀x ∃y (x + y = 320) — \"لكل x، يوجد y بحيث x + y = 320.\"<br>هذا صحيح للأعداد الحقيقية، لكنه خاطئ للأعداد الطبيعية (مثلاً x=500 يتطلب y=-180 وهو ليس طبيعيًا)." }
+                        ]}
+                    ],
+                    takeaways: [
+                        "المسندات عبارات ذات متغيرات؛ تصبح قضايا عند إسناد المتغيرات.",
+                        "∀ تعني 'للجميع' — مثل فحص كل عنصر.",
+                        "∃ تعني 'يوجد' — مثل فحص عنصر واحد على الأقل.",
+                        "مثال مضاد واحد يدحض عبارة شاملة.",
+                        "نفي المكممات يتبع قوانين دي مورغان.",
+                        "المكممات المتداخلة تعبر عن علاقات معقدة."
+                    ],
+                    quiz: [
+                        { q: "∀x P(x) تؤكد أن:", options: ["P(x) صحيحة لعنصر واحد على الأقل",
+                                "P(x) صحيحة لكل x", "P(x) خاطئة لكل x", "P(x) تعتمد على x"
+                            ], correct: 1 },
+                        { q: "نفي ∃x P(x) هو:", options: ["∃x ¬P(x)", "∀x ¬P(x)", "¬∃x ¬P(x)", "∀x P(x)"],
+                            correct: 1 },
+                        { q: "ما المثال المضاد لعبارة 'جميع الطيور تطير'؟", options: ["النسر", "البطريق", "العصفور",
+                                "الصقر"
+                            ], correct: 1 },
+                        { q: "∀x ∃y (x + y = 320) صحيحة لـ:", options: ["الأعداد الطبيعية فقط",
+                                "الأعداد الحقيقية فقط", "كلاهما", "لا شيء"
+                            ], correct: 1 }
+                    ]
+                }, {
+                    id: "ch4",
+                    number: "04",
+                    title: "نظرية المجموعات (Set Theory)",
+                    icon: "∅",
+                    overview: "المجموعات، الانتماء، التساوي، المجموعات الجزئية، العدد الأصلي، مجموعة القوى، الجداء الديكارتي، وعمليات المجموعات.",
+                    sections: [
+                        { id: "ch4-s1", title: "ما هي المجموعة؟ (What is a Set?)", subsections: [
+                            { type: "text", content: "المجموعة (Set) هي تجميعة غير مرتبة من العناصر المميزة، تسمى <strong>عناصر (Elements)</strong>. نكتب a ∈ A للدلالة على \"a عنصر من A\" و a ∉ A للدلالة على \"a ليس عنصرًا من A.\"" },
+                            { type: "code", content: "A = {9, 2, 7, -3}    // مجموعة أرقام\nB = {dog, cat, horse}  // مجموعة حيوانات\nC = ∅                 // المجموعة الفارغة" }
+                        ]},
+                        { id: "ch4-s2", title: "تساوي المجموعات (Set Equality)", subsections: [
+                            { type: "text", content: "المجموعتان A و B <strong>متساويتان</strong> إذا كانتا تحتويان على نفس العناصر بالضبط. الترتيب لا يهم والتكرار يُتجاهل." },
+                            { type: "example", title: "مثال", content: "A = {9, 2, 7, -3}, B = {7, 9, -3, 2} → A = B ✓<br>A = {dog, cat}, B = {cat, squirrel} → A ≠ B ✗" }
+                        ]},
+                        { id: "ch4-s3", title: "مجموعات الأعداد الشائعة", subsections: [
+                            { type: "code", content: "ℕ  = {0, 1, 2, 3, ...}       الأعداد الطبيعية\nℤ  = {..., -2, -1, 0, 1, 2, ...}  الأعداد الصحيحة\nℤ⁺ = {1, 2, 3, 4, ...}       الأعداد الصحيحة الموجبة\nℚ  = {a/b | a ∈ ℤ, b ∈ ℤ⁺}  الأعداد النسبية\nℝ  = جميع الأعداد الحقيقية\n∅  = {}                    المجموعة الفارغة" }
+                        ]},
+                        { id: "ch4-s4", title: "المجموعات الجزئية (Subsets)", subsections: [
+                            { type: "definition", title: "مجموعة جزئية (⊆)", content: "A ⊆ B تعني أن كل عنصر من A هو أيضًا عنصر من B.<br>بشكل رسمي: A ⊆ B ⇔ ∀x(x ∈ A → x ∈ B)" },
+                            { type: "definition", title: "مجموعة جزئية فعلية (⊂)", content: "A ⊂ B تعني A ⊆ B لكن A ≠ B. يوجد عنصر واحد على الأقل في B ليس في A." },
+                            { type: "code", content: "A = {1, 2}, B = {1, 2, 3}\nA ⊆ B ✓, A ⊂ B ✓, B ⊄ A\n\nقواعد مفيدة:\n• A = B ⇔ (A ⊆ B) ∧ (B ⊆ A)\n• (A ⊆ B) ∧ (B ⊆ C) → A ⊆ C\n• ∅ ⊆ A لأي مجموعة A\n• A ⊆ A لأي مجموعة A" }
+                        ]},
+                        { id: "ch4-s5", title: "العدد الأصلي (Cardinality)", subsections: [
+                            { type: "text", content: "العدد الأصلي (Cardinality) لمجموعة منتهية هو عدد العناصر المميزة فيها، ويُرمز له |S|." },
+                            { type: "example", title: "أمثلة", content: "|{Mercedes, BMW, Porsche}| = 3<br>|∅| = 0<br>|{a, b, c, d}| = 4" }
+                        ]},
+                        { id: "ch4-s6", title: "مجموعة القوى (Power Set)", subsections: [
+                            { type: "definition", title: "مجموعة القوى P(A)", content: "مجموعة القوى لـ A، يُرمز لها P(A) أو 2ᴬ، هي مجموعة جميع المجموعات الجزئية من A (بما فيها ∅ و A نفسها)." },
+                            { type: "example", title: "مثال", content: "A = {x, y}<br>P(A) = {∅, {x}, {y}, {x, y}}<br>|P(A)| = 2^|A| = 2² = 4<br><br>A = {x, y, z}<br>P(A) = {∅, {x}, {y}, {z}, {x,y}, {x,z}, {y,z}, {x,y,z}}<br>|P(A)| = 2³ = 8" },
+                            { type: "text", content: "<strong>مهم:</strong> لأي مجموعة A، |P(A)| = 2^|A|." }
+                        ]},
+                        { id: "ch4-s7", title: "الجداء الديكارتي (Cartesian Product)", subsections: [
+                            { type: "text", content: "A × B = {(a, b) | a ∈ A ∧ b ∈ B} — مجموعة جميع الأزواج المرتبة حيث العنصر الأول من A والثاني من B." },
+                            { type: "example", title: "مثال", content: "A = {1, 2}, B = {x, y}<br>A × B = {(1,x), (1,y), (2,x), (2,y)}<br>|A × B| = |A| × |B| = 2 × 2 = 4" },
+                            { type: "text", content: "ملاحظة: A × ∅ = ∅، وللمجموعات غير الفارغة المميزة، A × B ≠ B × A." }
+                        ]},
+                        { id: "ch4-s8", title: "عمليات المجموعات (Set Operations)", subsections: [
+                            { type: "definition", title: "الاتحاد (∪)", content: "A ∪ B = {x | x ∈ A ∨ x ∈ B}<br>|A ∪ B| = |A| + |B| - |A ∩ B|" },
+                            { type: "definition", title: "التقاطع (∩)", content: "A ∩ B = {x | x ∈ A ∧ x ∈ B}" },
+                            { type: "definition", title: "الفرق (−)", content: "A − B = {x | x ∈ A ∧ x ∉ B}<br>|A − B| = |A| - |A ∩ B|" },
+                            { type: "definition", title: "المكملة (ᶜ)", content: "Aᶜ = U − A = {x | x ∉ A} (بالنسبة للمجموعة الشاملة U)" }
+                        ]},
+                        { id: "ch4-s9", title: "هويات المجموعات (Set Identities)", subsections: [
+                            { type: "code", content: "الهوية:       A ∪ ∅ = A,  A ∩ U = A\nالسيطرة:       A ∪ U = U,  A ∩ ∅ = ∅\nالتكرار:       A ∪ A = A,  A ∩ A = A\nالمكملة المزدوجة: (Aᶜ)ᶜ = A\nالتبديل:       A ∪ B = B ∪ A,  A ∩ B = B ∩ A\nالدمج:         A ∪ (B ∪ C) = (A ∪ B) ∪ C\nالتوزيع:       A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)\nدي مورغان:     (A ∪ B)ᶜ = Aᶜ ∩ Bᶜ,  (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ\nالامتصاص:      A ∪ (A ∩ B) = A,  A ∩ (A ∪ B) = A\nالمكملة:       A ∪ Aᶜ = U,  A ∩ Aᶜ = ∅" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "المجموعات تجميعات غير مرتبة؛ التكرار والترتيب لا يهمان.",
+                        "|P(A)| = 2^|A| لأي مجموعة A.",
+                        "قوانين دي مورغان للمجموعات توازي تلك في المنطق.",
+                        "عدد عناصر الاتحاد يتطلب طرح التقاطع لتجنب العد المزدوج.",
+                        "هويات المجموعات أداة قوية لإثبات تساوي المجموعات."
+                    ],
+                    quiz: [
+                        { q: "ما هو |{a, b, a, c, b}|؟", options: ["5", "3", "4", "2"], correct: 1 },
+                        { q: "إذا كان A = {1, 2, 3}، فما هو |P(A)|؟", options: ["3", "6", "8", "9"], correct: 2 },
+                        { q: "A ∪ ∅ يساوي:", options: ["∅", "A", "U", "لا شيء مما سبق"], correct: 1 },
+                        { q: "إذا كان A ∩ B = ∅، فإن A و B تسمى:", options: ["متساويتين", "منفصلتين", "جزئيتين",
+                                "متكاملتين"
+                            ], correct: 1 }
+                    ]
+                }, {
+                    id: "ch5",
+                    number: "05",
+                    title: "الدوال (Functions)",
+                    icon: "ƒ",
+                    overview: "تعريف الدوال، الخصائص التباينية والشمولية والتقابلية، الدوال العكسية، التركيب، ودوال الأرضية والسقف.",
+                    sections: [
+                        { id: "ch5-s1", title: "ما هي الدالة؟ (What is a Function?)", subsections: [
+                            { type: "definition", title: "الدالة (Function)", content: "الدالة f: A → B تُسند <strong>عنصرًا واحدًا بالضبط</strong> من B لكل عنصر من A. نكتب f(a) = b." },
+                            { type: "code", content: "f: A → B\nA = المجال (المدخلات)\nB = المجال المقابل (المخرجات الممكنة)\nالمدى = {f(a) | a ∈ A} ⊆ B" },
+                            { type: "real-world", title: "تشبيه عملي", content: "فكر في الدالة كآلة بيع. تضع عملة (مدخل من المجال A)، وتعطيك الآلة وجبة واحدة بالضبط (مخرج من المجال B). لا يمكنك الحصول على وجبتين من عملة واحدة، وكل عملة يجب أن تنتج نتيجة." }
+                        ]},
+                        { id: "ch5-s2", title: "الدوال التباينية (Injective Functions)", subsections: [
+                            { type: "definition", title: "تباينية (Injective)", content: "الدالة <strong>تباينية</strong> (واحد لواحد) إذا كانت المدخلات المختلفة تنتج دائمًا مخرجات مختلفة.<br>بشكل رسمي: ∀x,y ∈ A (f(x) = f(y) → x = y)" },
+                            { type: "example", title: "مثال", content: "f(x) = 2x تباينية (لا يوجد x مختلفان يعطيان نفس النتيجة).<br>f(x) = x² ليست تباينية على ℝ (f(2) = f(-2) = 4)." }
+                        ]},
+                        { id: "ch5-s3", title: "الدوال الشمولية (Surjective Functions)", subsections: [
+                            { type: "definition", title: "شمولية (Surjective)", content: "الدالة <strong>شمولية</strong> (onto) إذا كان كل عنصر في المجال المقابل هو صورة لعنصر واحد على الأقل في المجال.<br>بشكل رسمي: ∀b ∈ B, ∃a ∈ A بحيث f(a) = b" },
+                            { type: "example", title: "مثال", content: "f: ℝ → ℝ, f(x) = x³ شمولية (كل عدد حقيقي يمكن الحصول عليه كمكعب).<br>f: ℝ → ℝ, f(x) = x² ليست شمولية (الأعداد السالبة لا يمكن الحصول عليها)." }
+                        ]},
+                        { id: "ch5-s4", title: "الدوال التقابلية (Bijective Functions)", subsections: [
+                            { type: "definition", title: "تقابل (Bijection)", content: "الدالة التي تكون <strong>تباينية وشمولية معًا</strong> تسمى تقابلًا (تطابقًا واحدًا لواحد)." },
+                            { type: "text", content: "إذا كانت f تقابلًا بين مجموعتين منتهيتين A و B، فإن |A| = |B|. هذا يعطينا أداة عد قوية!" },
+                            { type: "example", title: "مثال", content: "f: ℝ → ℝ, f(x) = 2x + 1 تقابلية.<br>كل مخرج يقابل مدخلًا واحدًا بالضبط: x = (y-1)/2." }
+                        ]},
+                        { id: "ch5-s5", title: "الدوال العكسية (Inverse Functions)", subsections: [
+                            { type: "definition", title: "الدالة العكسية", content: "عكس الدالة التقابلية f: A → B هو f⁻¹: B → A، حيث f⁻¹(b) = a ⇔ f(a) = b." },
+                            { type: "text", content: "<strong>الانعكاس ممكن فقط للدوال التقابلية.</strong> إذا لم تكن الدالة واحدًا لواحد، لا يمكنك عكسها بشكل فريد. إذا لم تكن شمولية، فبعض المخرجات ليس لها مدخلات." },
+                            { type: "example", title: "مثال", content: "f(x) = 2x + 1 → f⁻¹(x) = (x - 1) / 2<br>تحقق: f(f⁻¹(x)) = 2((x-1)/2) + 1 = x ✓" }
+                        ]},
+                        { id: "ch5-s6", title: "التركيب (Composition)", subsections: [
+                            { type: "definition", title: "التركيب (∘)", content: "بالنظر إلى g: A → B و f: B → C، التركيب f ∘ g: A → C يُعرف كالتالي: (f ∘ g)(a) = f(g(a))." },
+                            { type: "text", content: "ملاحظة: f ∘ g تعني \"طبق g أولاً، ثم طبق f.\" التركيب ليس دائمًا تبادليًا: f ∘ g ≠ g ∘ f عمومًا." },
+                            { type: "text", content: "تركيب الدالة وعكسها هو الدالة المحايدة: f ∘ f⁻¹ = f⁻¹ ∘ f = i(x) = x." }
+                        ]},
+                        { id: "ch5-s7", title: "دوال الأرضية والسقف (Floor & Ceiling)", subsections: [
+                            { type: "definition", title: "الأرضية ⌊r⌋", content: "دالة الأرضية تعطي أكبر عدد صحيح ≤ r. مثال: ⌊3.7⌋ = 3, ⌊-2.1⌋ = -3" },
+                            { type: "definition", title: "السقف ⌈r⌉", content: "دالة السقف تعطي أصغر عدد صحيح ≥ r. مثال: ⌈3.2⌉ = 4, ⌈-2.1⌉ = -2" },
+                            { type: "real-world", title: "استخدام عملي", content: "في البرمجة، القسمة الأرضية والسقف تُستخدمان للترقيم (كم صفحة نحتاج؟)، تخصيص الموارد، وعمليات التقريب." }
+                        ]}
+                    ],
+                    takeaways: [
+                        "الدالة تُسند لكل مدخل مخرجًا واحدًا بالضبط.",
+                        "تباينية: مدخلات مختلفة → مخرجات مختلفة.",
+                        "شمولية: كل مخرج له مدخل واحد على الأقل.",
+                        "تقابلية: تباينية وشمولية معًا — تطابق مثالي.",
+                        "فقط الدوال التقابلية لها دوال عكسية.",
+                        "دوال الأرضية/السقف تربط الأعداد الحقيقية بالأعداد الصحيحة."
+                    ],
+                    quiz: [
+                        { q: "f(x) = x² (من ℝ إلى ℝ) هي:", options: ["تباينية", "شمولية", "تقابلية", "لا شيء"],
+                            correct: 3 },
+                        { q: "التقابل بين مجموعتين منتهيتين A و B يعني:", options: ["|A| > |B|", "|A| < |B|",
+                                "|A| = |B|", "لا علاقة"
+                            ], correct: 2 },
+                        { q: "⌊5.9⌋ = ؟", options: ["5", "6", "5.9", "6.0"], correct: 0 },
+                        { q: "عكس f(x) = 3x هو:", options: ["f⁻¹(x) = -3x", "f⁻¹(x) = x/3", "f⁻¹(x) = 3/x",
+                                "لا يوجد عكس"
+                            ], correct: 1 }
+                    ]
+                }, {
+                    id: "ch6",
+                    number: "06",
+                    title: "الجبر البولياني (Boolean Algebra)",
+                    icon: "⊻",
+                    overview: "العمليات البوليانية، الدوال والتعبيرات البوليانية، وتطبيقاتها في الدوائر الإلكترونية.",
+                    sections: [
+                        { id: "ch6-s1", title: "العمليات البوليانية (Boolean Operations)", subsections: [
+                            { type: "text", content: "الجبر البولياني يعمل على المجموعة {0, 1} بثلاث عمليات أساسية:" },
+                            { type: "definition", title: "المكمل البولياني (NOT)", content: "¬0 = 1, ¬1 = 0. يُرمز له بشريط: 0̄ = 1, 1̄ = 0." },
+                            { type: "definition", title: "الجمع البولياني (OR)", content: "1 + 1 = 1, 1 + 0 = 1, 0 + 1 = 1, 0 + 0 = 0" },
+                            { type: "definition", title: "الضرب البولياني (AND)", content: "1 · 1 = 1, 1 · 0 = 0, 0 · 1 = 0, 0 · 0 = 0" },
+                            { type: "text", content: "لاحظ أنه في الجبر البولياني، 1 + 1 = 1 (على عكس الحساب العادي حيث 1 + 1 = 2). هذا لأننا نعمل مع قيم الحقيقة وليس الكميات." }
+                        ]},
+                        { id: "ch6-s2", title: "الدوال البوليانية (Boolean Functions)", subsections: [
+                            { type: "text", content: "ليكن B = {0, 1}. المتغير x يسمى متغيرًا بوليانيًا إذا كان يأخذ قيمًا من B فقط. الدالة من Bⁿ إلى B تسمى <strong>دالة بوليانية من الدرجة n</strong>." },
+                            { type: "text", content: "هناك 2ⁿ n-tuples مختلفة من 0s و 1s، وبالتالي <strong>2^(2ⁿ)</strong> دوال بوليانية مختلفة من الدرجة n." },
+                            { type: "example", title: "مثال", content: "لـ n = 2، هناك 2^4 = 16 دالة بوليانية مختلفة.<br>لـ n = 3، هناك 2^8 = 256 دالة بوليانية.<br>لـ n = 1، هناك 2^2 = 4: المحايدة، النفي، الثابت 0، الثابت 1." }
+                        ]},
+                        { id: "ch6-s3", title: "خصائص الجبر البولياني", subsections: [
+                            { type: "text", content: "الجبر البولياني هو مجموعة B مع عمليتين ثنائيتين ∨ و ∧، وعنصرين خاصين 0 و 1، وعملية أحادية مكملة، تحقق هذه البدهيات:" },
+                            { type: "code", content: "الهوية:      x ∨ 0 = x,  x ∧ 1 = x\nالمكملة:       x ∨ ¬x = 1,  x ∧ ¬x = 0\nالدمج:         x ∨ (y ∨ z) = (x ∨ y) ∨ z\n               x ∧ (y ∧ z) = (x ∧ y) ∧ z\nالتبديل:       x ∨ y = y ∨ x,  x ∧ y = y ∧ x\nالتوزيع:       x ∧ (y ∨ z) = (x ∧ y) ∨ (x ∧ z)\n               x ∨ (y ∧ z) = (x ∨ y) ∧ (x ∨ z)" }
+                        ]},
+                        { id: "ch6-s4", title: "البوابات المنطقية (Logic Gates)", subsections: [
+                            { type: "text", content: "الدوائر الإلكترونية مبنية من ثلاثة أنواع أساسية من <strong>البوابات (Gates)</strong>:" },
+                            { type: "code", content: "بوابة OR:  المخرج = x + y  (الجمع البولياني)\nبوابة AND: المخرج = x · y  (الضرب البولياني)\nبوابة NOT: المخرج = ¬x    (العاكس)" },
+                            { type: "real-world", title: "تطبيق", content: "كل حاسوب رقمي مبني من مليارات هذه البوابات الأساسية. المعالج والذاكرة — كلها مشتقة من مبادئ الجبر البولياني. يمكن تبسيط التعبيرات البوليانية لتقليل عدد البوابات اللازمة، مما يوفر الطاقة والمساحة." },
+                            { type: "example", title: "مثال تبسيط", content: "بسّط x + (x · y):<br>x + xy = x(1 + y) = x · 1 = x<br>هذا يعني أن الدائرة يمكن اختزالها إلى سلك فقط!" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "الجبر البولياني يعمل مع {0, 1} باستخدام عمليات NOT و AND و OR.",
+                        "1 + 1 = 1 في الجبر البولياني (وليس 2).",
+                        "هناك 2^(2ⁿ) دالة بوليانية من الدرجة n.",
+                        "البوابات المنطقية تنفذ العمليات البوليانية في العتاد.",
+                        "تبسيط الدوال البوليانية يقلل تعقيد الدوائر والتكلفة."
+                    ],
+                    quiz: [
+                        { q: "في الجبر البولياني، 1 + 1 = ؟", options: ["2", "0", "1", "غير محدد"], correct: 2 },
+                        { q: "كم عدد الدوال البوليانية من الدرجة 2؟", options: ["4", "8", "16", "32"], correct: 2 },
+                        { q: "أي بوابة تنفذ الجمع البولياني؟", options: ["بوابة AND", "بوابة OR", "بوابة NOT",
+                                "بوابة XOR"
+                            ], correct: 1 },
+                        { q: "x + xy يبسط إلى:", options: ["xy", "x", "y", "x + y"], correct: 1 }
+                    ]
+                }, {
+                    id: "ch7",
+                    number: "07",
+                    title: "المتتاليات والمجاميع (Sequences & Summations)",
+                    icon: "Σ",
+                    overview: "المتتاليات، رمز المجموع، صيغة غاوس، المتسلسلات الهندسية، وصيغ المتسلسلات الشائعة.",
+                    sections: [
+                        { id: "ch7-s1", title: "المتتاليات (Sequences)", subsections: [
+                            { type: "definition", title: "المتتالية (Sequence)", content: "المتتالية هي دالة من مجموعة جزئية من ℕ إلى مجموعة S. نستخدم aₙ للدلالة على صورة العدد الصحيح n، ونسميها الحد النوني." },
+                            { type: "example", title: "أمثلة", content: "1, 2, 3, 4, ... (الأعداد الطبيعية)<br>2, 4, 8, 16, ... (قوى العدد 2)<br>1, 1, 2, 3, 5, 8, ... (متتالية فيبوناتشي)" },
+                            { type: "text", content: "المتتاليات المنتهية تسمى <strong>سلاسل (Strings)</strong>. السلسلة الفارغة طولها صفر ولا تحتوي على حدود." }
+                        ]},
+                        { id: "ch7-s2", title: "رمز المجموع (Summation Notation)", subsections: [
+                            { type: "text", content: "رمز المجموع Σ يمثل مجموع الحدود من حد أدنى إلى حد أعلى. المتغير يسمى <strong>مؤشر الجمع</strong>." },
+                            { type: "code", content: "Σ(j=m to n) aⱼ = aₘ + aₘ₊₁ + ... + aₙ\n\nمثال:\nΣ(j=1 to 5) j = 1 + 2 + 3 + 4 + 5 = 15" }
+                        ]},
+                        { id: "ch7-s3", title: "صيغة غاوس (Gauss Formula)", subsections: [
+                            { type: "definition", title: "صيغة غاوس", content: "Σ(j=1 to n) j = n(n+1)/2" },
+                            { type: "example", title: "مثال", content: "1 + 2 + 3 + ... + 100 = 100 × 101 / 2 = 5050<br>1 + 2 + 3 + ... + 1000 = 1000 × 1001 / 2 = 500500" },
+                            { type: "real-world", title: "قصة", content: "اكتشف عالم الرياضيات الشهير كارل فريدريش غاوس هذه الصيغة وهو طفل. طلب معلمه من الفصل جمع 1 إلى 100. قام غاوس بازدواج الأرقام (1+100، 2+99، إلخ) وتوصل للإجابة في دقائق." }
+                        ]},
+                        { id: "ch7-s4", title: "المتسلسلات الهندسية (Geometric Series)", subsections: [
+                            { type: "definition", title: "صيغة المتسلسلة الهندسية", content: "1 + a + a² + ... + aⁿ = (aⁿ⁺¹ - 1) / (a - 1)، لـ a ≠ 1" },
+                            { type: "example", title: "مثال", content: "1 + 2 + 4 + 8 + ... + 64 = (2⁷ - 1) / (2 - 1) = 127<br>1 + 0.5 + 0.25 + ... = 1 / (1 - 0.5) = 2 (متسلسلة لا نهائية)" }
+                        ]},
+                        { id: "ch7-s5", title: "صيغ متسلسلات مفيدة", subsections: [
+                            { type: "code", content: "Σ j = n(n+1)/2\nΣ j² = n(n+1)(2n+1)/6\nΣ j³ = n²(n+1)²/4\nΣ aʲ = (aⁿ⁺¹ - 1)/(a - 1)" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "المتتاليات دوال من الأعداد الطبيعية إلى مجموعة.",
+                        "صيغة غاوس: Σj = n(n+1)/2.",
+                        "المتسلسلة الهندسية: Σaʲ = (aⁿ⁺¹-1)/(a-1).",
+                        "رمز المجموع يوفر طريقة مختصرة لتمثيل المجاميع.",
+                        "هذه الصيغ أساسية لتحليل الخوارزميات."
+                    ],
+                    quiz: [
+                        { q: "ما هو 1 + 2 + 3 + ... + 100؟", options: ["5000", "5050", "5100", "4950"], correct: 1 },
+                        { q: "ما مجموع المتسلسلة الهندسية 1 + 3 + 9 + 27؟", options: ["40", "30", "36", "44"],
+                            correct: 0 },
+                        { q: "Σ(j=1 to n) j² = ؟", options: ["n(n+1)/2", "n(n+1)(2n+1)/6", "n²(n+1)²/4",
+                                "n(n+1)/6"
+                            ], correct: 1 },
+                        { q: "طول السلسلة الفارغة هو:", options: ["1", "0", "غير محدد", "سالب"], correct: 1 }
+                    ]
+                }, {
+                    id: "ch8",
+                    number: "08",
+                    title: "الاستقراء الرياضي (Mathematical Induction)",
+                    icon: "🔗",
+                    overview: "مبدأ الاستقراء الرياضي لإثبات العبارات حول الأعداد الطبيعية.",
+                    sections: [
+                        { id: "ch8-s1", title: "مبدأ الاستقراء (Principle of Induction)", subsections: [
+                            { type: "text", content: "الاستقراء الرياضي تقنية إثبات قوية لإثبات أن المسند P(n) صحيح لجميع الأعداد الطبيعية. يعمل مثل الدومينو: اسقط الأول، وتأكد أن كل دومينو يسقط التالي." },
+                            { type: "code", content: "لإثبات أن P(n) صحيحة لجميع n ∈ ℕ:\n\n1. خطوة الأساس:       أثبت أن P(0) أو P(1) صحيحة.\n2. خطوة الاستقراء:      أثبت أنه إذا كانت P(n) صحيحة،\n   فإن P(n+1) يجب أن تكون صحيحة أيضًا (لأي n).\n3. الاستنتاج:         P(n) صحيحة لجميع n ∈ ℕ." }
+                        ]},
+                        { id: "ch8-s2", title: "كيف يعمل الاستقراء", subsections: [
+                            { type: "text", content: "فكر في صف لا نهائي من قطع الدومينو. إذا أسقطت القطعة الأولى (خطوة الأساس)، وتحققت من أن كل قطعة تسقط ستُسقط التالية (خطوة الاستقراء)، فإن جميع القطع ستسقط." },
+                            { type: "text", content: "الفكرة الرئيسية: الاستقراء <strong>يثبت</strong> النظريات لكنه لا <strong>يكتشفها</strong>. تحتاج إلى حدس أولاً، ثم تستخدم الاستقراء للتحقق منه." }
+                        ]},
+                        { id: "ch8-s3", title: "مثال إثبات بالاستقراء", subsections: [
+                            { type: "example", title: "أثبت: 1 + 2 + 3 + ... + n = n(n+1)/2", content: "<strong>خطوة الأساس (n=1):</strong> الطرف الأيسر = 1، الطرف الأيمن = 1(2)/2 = 1 ✓<br><br><strong>خطوة الاستقراء:</strong> نفترض P(k): 1 + 2 + ... + k = k(k+1)/2<br>نثبت P(k+1): 1 + 2 + ... + k + (k+1) = (k+1)(k+2)/2<br><br>الطرف الأيسر = [1 + 2 + ... + k] + (k+1)<br>= k(k+1)/2 + (k+1)  [باستخدام فرضية الاستقراء]<br>= (k+1)(k/2 + 1)<br>= (k+1)(k+2)/2 = الطرف الأيمن ✓<br><br>لذلك، بالاستقراء، الصيغة صحيحة لجميع n ∈ ℕ." }
+                        ]},
+                        { id: "ch8-s4", title: "أمثلة تدريبية", subsections: [
+                            { type: "text", content: "تمارين إضافية من التدريب:" },
+                            { type: "example", title: "تدريب على المكممات", content: "P(x): \"x + 1 > x\" → ∀x P(x) صحيحة للأعداد الحقيقية.<br>Q(x): \"x < 2\" → ∀x Q(x) خاطئة (مثال مضاد: x = 3).<br>P(x): \"x > 3\" → ∃x P(x) صحيحة (مثلاً x = 4).<br>Q(x): \"x = x + 1\" → ∃x Q(x) خاطئة (لا يوجد حل)." },
+                            { type: "example", title: "تدريب على النفي", content: "\"يوجد سياسي صادق\" = ∃x H(x)<br>النفي: ¬∃x H(x) ≡ ∀x ¬H(x) = \"كل سياسي غير صادق.\"<br><br>قوانين دي مورغان للمكممات:<br>¬∃x P(x) ≡ ∀x ¬P(x)<br>¬∀x P(x) ≡ ∃x ¬P(x)" }
+                        ]}
+                    ],
+                    takeaways: [
+                        "الاستقراء عملية من خطوتين: الأساس + خطوة الاستقراء.",
+                        "يثبت العبارات لجميع الأعداد الطبيعية، وليس لحالات قليلة فقط.",
+                        "فرضية الاستقراء هي المفتاح لخطوة الاستقراء.",
+                        "الاستقراء يعمل لأن الأعداد الطبيعية مرتبة ترتيبًا حسنًا.",
+                        "إنه أداة تحقق وليس أداة اكتشاف."
+                    ],
+                    quiz: [
+                        { q: "خطوة الأساس في الاستقراء تثبت عادةً:", options: ["P(n) لجميع n", "P(0) أو P(1)",
+                                "P(n) → P(n+1)", "لا شيء مما سبق"
+                            ], correct: 1 },
+                        { q: "في خطوة الاستقراء، نفترض:", options: ["P(n+1) صحيحة", "P(n) صحيحة", "P(0) صحيحة",
+                                "لا شيء"
+                            ], correct: 1 },
+                        { q: "نفي ∃x P(x) هو:", options: ["∀x ¬P(x)", "∃x ¬P(x)", "¬∀x P(x)", "لا شيء"], correct: 0 },
+                        { q: "يمكن استخدام الاستقراء لـ:", options: ["اكتشاف نظريات جديدة",
+                                "إثبات حدسيات موجودة", "إيجاد أمثلة مضادة", "كل ما سبق"
+                            ], correct: 1 }
+                    ]
+                }]
+            }
+        };
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentLang = 'en';
+        let sidebarOpen = true;
+        let activeChapter = 'ch1';
+        let activeSection = null;
+        let searchQuery = '';
+
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const sidebarEl = document.getElementById('sidebar');
+        const sidebarNavEl = document.getElementById('sidebarNav');
+        const mainContentEl = document.getElementById('mainContent');
+        const pageContentEl = document.getElementById('pageContent');
+        const sidebarOverlayEl = document.getElementById('sidebarOverlay');
+        const searchInputEl = document.getElementById('searchInput');
+        const searchResultsEl = document.getElementById('searchResults');
+        const langToggleBtn = document.getElementById('langToggleBtn');
+
+        // ============================================================
+        // LANGUAGE SWITCHING
+        // ============================================================
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.querySelector('html').setAttribute('dir', document.body.dir);
+
+            // Update language buttons
+            const langEnBtn = document.getElementById('langEnBtn');
+            const langArBtn = document.getElementById('langArBtn');
+            if (langEnBtn && langArBtn) {
+                langEnBtn.style.opacity = lang === 'en' ? '1' : '0.5';
+                langArBtn.style.opacity = lang === 'ar' ? '1' : '0.5';
+            }
+            langToggleBtn.textContent = lang === 'en' ? 'عربي' : 'English';
+
+            // Update placeholder
+            searchInputEl.placeholder = contentData[lang].search_placeholder;
+
+            // Re-render everything
+            renderSidebar();
+            renderPage(activeChapter);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (contentData[lang][key]) {
+                    el.textContent = contentData[lang][key];
+                }
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (contentData[lang][key]) {
+                    el.placeholder = contentData[lang][key];
+                }
+            });
+        }
+
+        // ============================================================
+        // SIDEBAR NAVIGATION
+        // ============================================================
+        function toggleSidebar(forceState) {
+            if (window.innerWidth <= 768) {
+                // Mobile: toggle class
+                sidebarOpen = forceState !== undefined ? forceState : !sidebarEl.classList.contains('open-mobile');
+                sidebarEl.classList.toggle('open-mobile', sidebarOpen);
+                sidebarOverlayEl.classList.toggle('active', sidebarOpen);
+            } else {
+                // Desktop
+                sidebarOpen = forceState !== undefined ? forceState : !sidebarOpen;
+                sidebarEl.classList.toggle('closed', !sidebarOpen);
+                mainContentEl.classList.toggle('expanded', !sidebarOpen);
+            }
+        }
+
+        function renderSidebar() {
+            const data = contentData[currentLang];
+            sidebarNavEl.innerHTML = '';
+            data.chapters.forEach(ch => {
+                const chapterDiv = document.createElement('div');
+                chapterDiv.className = 'nav-chapter';
+                chapterDiv.innerHTML = `
+                    <button class="nav-chapter-btn ${activeChapter === ch.id ? 'active' : ''}" 
+                            onclick="toggleChapterNav('${ch.id}')" 
+                            data-chapter="${ch.id}">
+                        <span>${ch.icon} ${ch.number}. ${ch.title}</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="chevron" style="transform:rotate(${activeChapter === ch.id ? '0deg' : '-90deg'});transition:transform 0.2s;">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                    <div class="nav-sublinks ${activeChapter === ch.id ? 'open' : ''}" id="subnav-${ch.id}">
+                        ${ch.sections.map(s => `
+                            <button class="nav-sublink ${activeSection === s.id ? 'active' : ''}" 
+                                    onclick="navigateToSection('${ch.id}','${s.id}')">
+                                ${s.title}
+                            </button>
+                        `).join('')}
+                        <button class="nav-sublink" style="color:var(--success);" 
+                                onclick="navigateToSection('${ch.id}','${ch.id}-quiz')">
+                            📝 Quiz
+                        </button>
+                        <button class="nav-sublink" style="color:var(--warning);" 
+                                onclick="navigateToSection('${ch.id}','${ch.id}-takeaways')">
+                            🔑 Key Takeaways
+                        </button>
+                    </div>
+                `;
+                sidebarNavEl.appendChild(chapterDiv);
+            });
+        }
+
+        function toggleChapterNav(chId) {
+            const subnav = document.getElementById(`subnav-${chId}`);
+            const btn = document.querySelector(`[data-chapter="${chId}"]`);
+            if (subnav) {
+                subnav.classList.toggle('open');
+                const chevron = btn.querySelector('.chevron');
+                if (chevron) {
+                    chevron.style.transform = subnav.classList.contains('open') ? 'rotate(0deg)' : 'rotate(-90deg)';
+                }
+            }
+            if (activeChapter === chId) {
+                activeChapter = null;
+                activeSection = null;
+            } else {
+                activeChapter = chId;
+                activeSection = null;
+                renderSidebar();
+                renderPage(chId);
+            }
+        }
+
+        function navigateToSection(chId, sectionId) {
+            activeChapter = chId;
+            activeSection = sectionId;
+            renderSidebar();
+            renderPage(chId);
+            // Scroll to section
+            setTimeout(() => {
+                const el = document.getElementById(sectionId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+            if (window.innerWidth <= 768) {
+                toggleSidebar(false);
+            }
+        }
+
+        // ============================================================
+        // PAGE RENDERING
+        // ============================================================
+        function renderPage(chId) {
+            const data = contentData[currentLang];
+            const chapter = data.chapters.find(c => c.id === chId);
+            if (!chapter) return;
+
+            // Breadcrumb
+            const breadcrumbHtml = `
+                <div class="breadcrumb">
+                    <a href="#" onclick="renderHome();return false;">${data.breadcrumb_home}</a>
+                    <span class="separator">/</span>
+                    <span>${chapter.icon} ${chapter.title}</span>
+                </div>
+            `;
+
+            let sectionsHtml = `
+                <div style="margin-bottom:24px;">
+                    <span class="tag tag-blue">${data.chapters.indexOf(chapter) + 1} / ${data.chapters.length}</span>
+                    <h1 style="font-size:1.8rem;font-weight:800;margin:12px 0 8px;color:var(--text-primary);">${chapter.icon} ${chapter.title}</h1>
+                    <p style="color:var(--text-secondary);font-size:1.05rem;">${chapter.overview}</p>
+                </div>
+            `;
+
+            // Sections
+            chapter.sections.forEach(section => {
+                sectionsHtml += `<div id="${section.id}" style="margin-bottom:32px;padding-top:16px;">`;
+                sectionsHtml += `<h2 style="font-size:1.3rem;font-weight:700;color:var(--accent);margin-bottom:12px;">${section.title}</h2>`;
+
+                section.subsections.forEach(sub => {
+                    if (sub.type === 'text') {
+                        sectionsHtml += `<div style="margin:10px 0;color:var(--text-secondary);">${sub.content}</div>`;
+                    } else if (sub.type === 'definition') {
+                        sectionsHtml += `
+                            <div class="definition-box">
+                                <strong style="color:var(--accent);display:block;margin-bottom:4px;">📌 ${sub.title}</strong>
+                                ${sub.content}
+                            </div>
+                        `;
+                    } else if (sub.type === 'example') {
+                        sectionsHtml += `
+                            <div class="example-box">
+                                <strong style="color:var(--accent-violet);display:block;margin-bottom:4px;">💡 ${sub.title || 'Example'}</strong>
+                                ${sub.content}
+                            </div>
+                        `;
+                    } else if (sub.type === 'real-world') {
+                        sectionsHtml += `
+                            <div style="background-color:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.25);border-radius:8px;padding:14px 18px;margin:12px 0;">
+                                <strong style="color:var(--success);display:block;margin-bottom:4px;">🌍 ${sub.title || 'Real-World Connection'}</strong>
+                                ${sub.content}
+                            </div>
+                        `;
+                    } else if (sub.type === 'key-takeaway') {
+                        sectionsHtml += `
+                            <div class="key-takeaway">
+                                <strong style="color:var(--success);display:block;margin-bottom:4px;">🔑 Key Takeaway</strong>
+                                ${sub.content}
+                            </div>
+                        `;
+                    } else if (sub.type === 'code') {
+                        sectionsHtml += `<div class="code-block">${sub.content}</div>`;
+                    } else if (sub.type === 'truth-table') {
+                        sectionsHtml += `<div style="overflow-x:auto;"><table class="truth-table"><thead><tr>${sub.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${sub.rows.map(row => `<tr>${row.map(cell => `<td class="${cell === 'T' || cell === 'F' ? 'highlight' : ''}">${cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+                    }
+                });
+
+                sectionsHtml += `</div>`;
+            });
+
+            // Quiz section
+            sectionsHtml += `
+                <div id="${chapter.id}-quiz" style="margin-bottom:32px;padding-top:16px;">
+                    <h2 style="font-size:1.3rem;font-weight:700;color:var(--accent-violet);margin-bottom:12px;">📝 ${currentLang === 'en' ? 'Self-Assessment Quiz' : 'اختبار ذاتي'}</h2>
+                    <div style="display:flex;flex-direction:column;gap:16px;">
+            `;
+            chapter.quiz.forEach((q, qIdx) => {
+                sectionsHtml += `
+                    <div class="card" style="padding:16px 20px;" data-quiz-id="${chId}-${qIdx}">
+                        <div style="font-weight:600;margin-bottom:10px;color:var(--text-primary);">Q${qIdx + 1}. ${q.q}</div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            ${q.options.map((opt, optIdx) => `
+                                <label class="quiz-option" data-quiz="${chId}-${qIdx}" data-opt="${optIdx}" onclick="checkQuizAnswer('${chId}-${qIdx}', ${optIdx}, ${q.correct})">
+                                    <input type="radio" name="quiz-${chId}-${qIdx}" value="${optIdx}">
+                                    <span>${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <div class="quiz-feedback" id="feedback-${chId}-${qIdx}" style="margin-top:8px;font-size:0.85rem;font-weight:600;"></div>
+                    </div>
+                `;
+            });
+            sectionsHtml += `</div></div>`;
+
+            // Takeaways
+            sectionsHtml += `
+                <div id="${chapter.id}-takeaways" style="margin-bottom:32px;padding-top:16px;">
+                    <h2 style="font-size:1.3rem;font-weight:700;color:var(--success);margin-bottom:12px;">🔑 ${currentLang === 'en' ? 'Key Takeaways' : 'الخلاصات الرئيسية'}</h2>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        ${chapter.takeaways.map(t => `
+                            <div class="key-takeaway" style="margin:0;padding:12px 16px;display:flex;align-items:flex-start;gap:10px;">
+                                <span style="color:var(--success);font-weight:800;">✓</span>
+                                <span style="color:var(--text-secondary);">${t}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            pageContentEl.innerHTML = breadcrumbHtml + sectionsHtml;
+        }
+
+        function renderHome() {
+            const data = contentData[currentLang];
+            activeChapter = null;
+            activeSection = null;
+            renderSidebar();
+            pageContentEl.innerHTML = `
+                <div style="text-align:center;padding:60px 20px;max-width:700px;margin:0 auto;">
+                    <div style="font-size:3rem;margin-bottom:16px;">📚</div>
+                    <h1 style="font-size:2rem;font-weight:800;color:var(--text-primary);margin-bottom:12px;">
+                        ${data.app_title}
+                    </h1>
+                    <p style="color:var(--text-secondary);font-size:1.1rem;margin-bottom:24px;">
+                        ${data.app_subtitle}
+                    </p>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:32px;">
+                        ${data.chapters.map(ch => `
+                            <button onclick="navigateToChapter('${ch.id}')" 
+                                    style="padding:10px 18px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--bg-surface);color:var(--text-primary);cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.2s;"
+                                    onmouseover="this.style.borderColor='var(--accent)';this.style.background='rgba(56,189,248,0.08)'"
+                                    onmouseout="this.style.borderColor='var(--border-subtle)';this.style.background='var(--bg-surface)'">
+                                ${ch.icon} ${ch.number}. ${ch.title}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div style="color:var(--text-muted);font-size:0.85rem;border-top:1px solid var(--border-subtle);padding-top:20px;">
+                        ${data.grading_note}
+                    </div>
+                </div>
+            `;
+        }
+
+        function navigateToChapter(chId) {
+            activeChapter = chId;
+            activeSection = null;
+            renderSidebar();
+            renderPage(chId);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============================================================
+        // QUIZ LOGIC
+        // ============================================================
+        function checkQuizAnswer(quizId, selectedOpt, correctOpt) {
+            const feedbackEl = document.getElementById(`feedback-${quizId}`);
+            const options = document.querySelectorAll(`.quiz-option[data-quiz="${quizId}"]`);
+            let answered = false;
+
+            options.forEach((opt, idx) => {
+                const input = opt.querySelector('input');
+                if (idx === correctOpt) {
+                    opt.classList.add('correct');
+                } else if (idx === selectedOpt && selectedOpt !== correctOpt) {
+                    opt.classList.add('incorrect');
+                }
+                if (idx === selectedOpt) {
+                    input.checked = true;
+                }
+                // Disable further clicks
+                opt.style.pointerEvents = 'none';
+                opt.style.cursor = 'default';
+            });
+
+            if (selectedOpt === correctOpt) {
+                feedbackEl.textContent = '✅ ' + (currentLang === 'en' ? 'Correct!' : 'صحيح!');
+                feedbackEl.style.color = 'var(--success)';
+            } else {
+                feedbackEl.textContent = '❌ ' + (currentLang === 'en' ? 'Incorrect. Try again or review the material.' :
+                    'غير صحيح. حاول مرة أخرى أو راجع المادة.');
+                feedbackEl.style.color = 'var(--error)';
+            }
+        }
+
+        // ============================================================
+        // SEARCH
+        // ============================================================
+        function handleSearch(query) {
+            searchQuery = query.trim().toLowerCase();
+            if (searchQuery.length < 2) {
+                searchResultsEl.style.display = 'none';
+                return;
+            }
+            const data = contentData[currentLang];
+            const results = [];
+            data.chapters.forEach(ch => {
+                // Search in chapter title and overview
+                if (ch.title.toLowerCase().includes(searchQuery) || ch.overview.toLowerCase().includes(
+                        searchQuery)) {
+                    results.push({ chapterId: ch.id, type: 'chapter', text: ch.title, sectionId: null });
+                }
+                ch.sections.forEach(s => {
+                    if (s.title.toLowerCase().includes(searchQuery)) {
+                        results.push({ chapterId: ch.id, type: 'section', text: s.title, sectionId: s.id });
+                    }
+                    s.subsections.forEach(sub => {
+                        if (sub.content && sub.content.toLowerCase().replace(/<[^>]*>/g, '').includes(
+                                searchQuery)) {
+                            results.push({ chapterId: ch.id, type: 'content', text: sub.content.replace(
+                                    /<[^>]*>/g, '').substring(0, 80) + '...', sectionId: s.id });
+                        }
+                    });
+                });
+            });
+
+            if (results.length === 0) {
+                searchResultsEl.innerHTML = `<div style="padding:12px 16px;color:var(--text-muted);">${currentLang === 'en' ? 'No results found' : 'لا توجد نتائج'}</div>`;
+            } else {
+                searchResultsEl.innerHTML = results.slice(0, 12).map((r, i) => `
+                    <button onclick="searchNavigate('${r.chapterId}', '${r.sectionId || ''}')" 
+                            style="display:block;width:100%;padding:10px 16px;background:transparent;border:none;color:var(--text-secondary);text-align:left;cursor:pointer;font-size:0.82rem;border-bottom:1px solid var(--border-subtle);"
+                            onmouseover="this.style.background='rgba(56,189,248,0.06)'"
+                            onmouseout="this.style.background='transparent'">
+                        <span style="color:var(--accent);font-weight:600;">${r.type === 'chapter' ? '📁' : r.type === 'section' ? '📄' : '...'}</span> ${r.text}
+                    </button>
+                `).join('');
+            }
+            searchResultsEl.style.display = 'block';
+        }
+
+        function searchNavigate(chId, sectionId) {
+            searchResultsEl.style.display = 'none';
+            searchInputEl.value = '';
+            searchQuery = '';
+            activeChapter = chId;
+            activeSection = sectionId || null;
+            renderSidebar();
+            renderPage(chId);
+            if (sectionId) {
+                setTimeout(() => {
+                    const el = document.getElementById(sectionId);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // ============================================================
+        // KEYBOARD & UI EVENTS
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchResultsEl.style.display = 'none';
+                if (window.innerWidth <= 768 && sidebarOpen) {
+                    toggleSidebar(false);
+                }
+            }
+            if (e.key === '/' && !e.target.closest('input')) {
+                e.preventDefault();
+                searchInputEl.focus();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebarEl.classList.remove('open-mobile');
+                sidebarOverlayEl.classList.remove('active');
+                if (sidebarOpen) {
+                    sidebarEl.classList.remove('closed');
+                    mainContentEl.classList.remove('expanded');
+                }
+            } else {
+                sidebarEl.classList.remove('closed');
+                mainContentEl.classList.remove('expanded');
+                if (!sidebarOpen) {
+                    sidebarEl.classList.remove('open-mobile');
+                }
+            }
+        });
+
+        searchInputEl.addEventListener('blur', () => {
+            setTimeout(() => { searchResultsEl.style.display = 'none'; }, 200);
+        });
+        searchInputEl.addEventListener('focus', () => {
+            if (searchQuery.length >= 2) {
+                searchResultsEl.style.display = 'block';
+            }
+        });
+
+        // ============================================================
+        // INITIALIZE
+        // ============================================================
+        function init() {
+            switchLanguage('en');
+            renderHome();
+            if (window.innerWidth > 768) {
+                sidebarOpen = true;
+                sidebarEl.classList.remove('closed');
+            } else {
+                sidebarOpen = false;
+                sidebarEl.classList.remove('open-mobile');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
