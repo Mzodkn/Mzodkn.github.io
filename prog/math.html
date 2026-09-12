@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Mathematics — Interactive Study Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bg: { base: '#0f172a', surface: '#1e293b', elevated: '#334155' },
+                        border: { subtle: '#334155', strong: '#475569' },
+                        text: { primary: '#f8fafc', secondary: '#cbd5e1', muted: '#94a3b8' },
+                        accent: { blue: '#38bdf8', violet: '#a78bfa' },
+                        status: { success: '#34d399', warning: '#fbbf24', error: '#f87171' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Cairo', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- MathJax Configuration for LaTeX -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
+            startup: { typeset: false } 
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Forced Dark Theme Styles */
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+        body[dir="rtl"] { font-family: 'Cairo', 'Inter', sans-serif; }
+        
+        /* Strict LTR Enforcement for English terms and Math */
+        .en-term, code, .math-block {
+            direction: ltr !important;
+            unicode-bidi: isolate;
+            display: inline-block;
+            font-family: 'JetBrains Mono', 'Inter', monospace;
+        }
+        body[dir="rtl"] .en-term { padding-inline: 6px; color: #38bdf8; font-weight: 600; font-family: 'Inter', sans-serif; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+        /* Layout Structure */
+        #sidebar {
+            position: fixed; top: 0; bottom: 0; width: 300px;
+            background-color: #1e293b; border-right: 1px solid #334155;
+            z-index: 50; overflow-y: auto; transition: transform 0.3s ease;
+        }
+        body[dir="rtl"] #sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid #334155; }
+        #sidebar.closed { transform: translateX(-100%); }
+        body[dir="rtl"] #sidebar.closed { transform: translateX(100%); }
+
+        #mainContent { margin-left: 300px; min-height: 100vh; transition: margin 0.3s ease; }
+        body[dir="rtl"] #mainContent { margin-left: 0; margin-right: 300px; }
+        #mainContent.expanded { margin: 0; }
+
+        /* Cards & Buttons */
+        .nav-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 12px 16px; font-weight: 600; color: #cbd5e1;
+            border-radius: 6px; transition: all 0.2s; text-align: start;
+        }
+        .nav-btn:hover { background-color: #334155; color: #f8fafc; }
+        .nav-btn.active { background-color: rgba(56, 189, 248, 0.1); color: #38bdf8; border-inline-start: 4px solid #38bdf8; }
+        
+        .box { padding: 16px 20px; border-radius: 8px; margin: 16px 0; border-inline-start: 4px solid; background-color: rgba(255,255,255,0.03); }
+        .box-def { border-color: #38bdf8; }
+        .box-ex { border-color: #a78bfa; }
+        .box-take { border-color: #34d399; }
+
+        /* Truth Table Styling */
+        .truth-table-container { overflow-x: auto; margin: 20px 0; border-radius: 8px; border: 1px solid #475569; }
+        .truth-table { width: 100%; border-collapse: collapse; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; }
+        .truth-table th { background-color: #334155; padding: 12px; color: #38bdf8; border-bottom: 2px solid #475569; white-space: nowrap; }
+        .truth-table td { padding: 12px; border-bottom: 1px solid #334155; color: #cbd5e1; }
+        .truth-table tr:hover { background-color: rgba(255,255,255,0.02); }
+        .val-t { color: #34d399; font-weight: bold; }
+        .val-f { color: #f87171; font-weight: bold; }
+
+        /* Quiz Styling */
+        .quiz-option {
+            display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 8px;
+            border: 1px solid #334155; cursor: pointer; transition: all 0.2s; background: #1e293b;
+        }
+        .quiz-option:hover { border-color: #475569; background: #334155; }
+        .quiz-option.correct { border-color: #34d399; background: rgba(52, 211, 153, 0.1); color: #34d399; }
+        .quiz-option.wrong { border-color: #f87171; background: rgba(248, 113, 113, 0.1); color: #f87171; }
+
+        .code-block {
+            background-color: #0d1424; padding: 16px; border-radius: 8px; border: 1px solid #334155;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #e2e8f0; white-space: pre-wrap; direction: ltr; text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar { transform: translateX(-100%); }
+            body[dir="rtl"] #sidebar { transform: translateX(100%); }
+            #sidebar.open-mobile { transform: translateX(0); }
+            #mainContent { margin: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/70 z-40 hidden backdrop-blur-sm" onclick="toggleSidebar(false)"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="flex flex-col">
+        <div class="p-6 border-b border-border-subtle bg-bg-base">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-accent-blue to-accent-violet flex items-center justify-center font-bold text-white shadow-lg text-xl">DM</div>
+                <div>
+                    <h1 class="font-bold text-text-primary text-base leading-tight" data-i18n="app_title">Discrete Math</h1>
+                    <span class="text-xs text-text-muted" data-i18n="app_subtitle">Interactive Lectures</span>
+                </div>
+            </div>
+        </div>
+        <nav id="sidebarNav" class="flex-1 overflow-y-auto p-4 space-y-2"></nav>
+        <div class="p-5 border-t border-border-subtle bg-bg-base text-center">
+            <button onclick="switchLanguage(currentLang === 'en' ? 'ar' : 'en')" class="w-full py-2.5 rounded-lg bg-bg-elevated border border-border-strong text-sm font-bold text-text-primary hover:bg-border-subtle transition shadow-md">
+                <span id="langBtnText">العربية</span> 🌐
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="mainContent">
+        <!-- Top Header -->
+        <header class="h-16 bg-bg-base/95 backdrop-blur border-b border-border-subtle flex items-center px-4 sm:px-8 sticky top-0 z-30">
+            <button onclick="toggleSidebar()" class="text-text-secondary hover:text-white transition p-2 bg-bg-elevated rounded-lg md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div class="flex-1 text-center sm:text-start mx-4 font-semibold text-text-secondary text-sm" id="topBreadcrumb"></div>
+        </header>
+
+        <!-- Dynamic Page Injector -->
+        <article id="pageContent" class="p-6 sm:p-12 max-w-5xl mx-auto pb-24"></article>
+    </main>
+
+    <script>
+        // =========================================================================
+        // DATA REPOSITORY
+        // =========================================================================
+        const contentData = {
+            en: {
+                app_title: "Discrete Math",
+                app_subtitle: "Interactive Lectures",
+                bc_home: "Portal",
+                lbl_def: "📌 Definition",
+                lbl_ex: "💡 Example",
+                lbl_take: "🔑 Key Takeaway",
+                lbl_quiz: "📝 Self-Assessment Quiz",
+                chapters: [
+                    {
+                        id: "ch1", number: "01", icon: "🧠", title: "Propositional Logic",
+                        overview: "Logic is based on propositions. We study statements, truth values, and open sentences.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "Propositions & Truth Values", items: [
+                                { type: "text", content: "(Propositional) Logic is a system based on propositions. It is highly important for program design and electronic circuitry.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "A <strong>proposition</strong> is a (declarative) statement that is either <strong>true (T)</strong> or <strong>false (F)</strong> (not both). This corresponds to 1 and 0 in digital circuits.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "The Statement/Proposition Game", items: [
+                                { type: "ex", content: "<ul><li>\"Elephants are bigger than mice.\" &rarr; Statement? Yes. Proposition? Yes. Truth value: <strong>True</strong>.<span class='hidden'>[cite: 7]</span></li><li>$520 < 111$ &rarr; Statement? Yes. Proposition? Yes. Truth value: <strong>False</strong>.<span class='hidden'>[cite: 7]</span></li><li>\"Please do not fall asleep.\" &rarr; Statement? No, it's a request. Proposition? No.<span class='hidden'>[cite: 7]</span></li><li>\"If the moon is made of cheese, then I will be rich.\" &rarr; Statement? Yes. Proposition? Yes. Truth value: Probably true.<span class='hidden'>[cite: 7]</span></li></ul>" },
+                                { type: "def", content: "<strong>Open Sentence (Propositional Function):</strong> \"$y > 5$\" is a statement, but NOT a proposition. Its truth value depends on the value of $y$, which is not specified.<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "Is the phrase \"x < y if and only if y > x\" considered a proposition?<span class='hidden'>[cite: 7]</span>", opts: ["No, it's an open sentence.", "Yes, because its truth value does not depend on specific values of x and y (it is always true).", "No, it is a request.", "Yes, but it is always false."], ans: 1 },
+                            { q: "What does True (T) and False (F) correspond to in digital circuits?<span class='hidden'>[cite: 7]</span>", opts: ["On and Off", "1 and 0", "High and Low", "All of the above"], ans: 1 }
+                        ]
+                    },
+                    {
+                        id: "ch2", number: "02", icon: "⚡", title: "Logical Operators & Truth Tables",
+                        overview: "Understanding how propositions are combined using logical connectives and their exact truth tables.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "Logical Connectives", items: [
+                                { type: "text", content: "One or more propositions can be combined to form a single compound proposition using logical operators (connectives). We examine six main operators.<span class='hidden'>[cite: 7]</span>" },
+                                
+                                { type: "def", content: "<strong>Negation (NOT, $\\neg$)</strong>: Unary operator. Flips the truth value.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$\\neg P$"], rows: [["T", "<span class='val-f'>F</span>"], ["F", "<span class='val-t'>T</span>"]] },
+                                
+                                { type: "def", content: "<strong>Conjunction (AND, $\\land$)</strong>: Binary operator. True only when both are true.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\land Q$"], rows: [["T", "T", "<span class='val-t'>T</span>"], ["T", "F", "<span class='val-f'>F</span>"], ["F", "T", "<span class='val-f'>F</span>"], ["F", "F", "<span class='val-f'>F</span>"]] },
+                                
+                                { type: "def", content: "<strong>Disjunction (OR, $\\lor$)</strong>: Binary operator. True when at least one is true.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\lor Q$"], rows: [["T", "T", "<span class='val-t'>T</span>"], ["T", "F", "<span class='val-t'>T</span>"], ["F", "T", "<span class='val-t'>T</span>"], ["F", "F", "<span class='val-f'>F</span>"]] },
+                                
+                                { type: "def", content: "<strong>Exclusive Or (XOR, $\\oplus$)</strong>: Binary operator. True when exactly one is true (ambiguity resolver in natural language).<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\oplus Q$"], rows: [["T", "T", "<span class='val-f'>F</span>"], ["T", "F", "<span class='val-t'>T</span>"], ["F", "T", "<span class='val-t'>T</span>"], ["F", "F", "<span class='val-f'>F</span>"]] },
+                                
+                                { type: "def", content: "<strong>Implication (if-then, $\\rightarrow$)</strong>: Binary operator. False ONLY when the first is true and the second is false.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\rightarrow Q$"], rows: [["T", "T", "<span class='val-t'>T</span>"], ["T", "F", "<span class='val-f'>F</span>"], ["F", "T", "<span class='val-t'>T</span>"], ["F", "F", "<span class='val-t'>T</span>"]] },
+                                
+                                { type: "def", content: "<strong>Biconditional (if and only if, $\\leftrightarrow$)</strong>: True when both have the identical truth value.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\leftrightarrow Q$"], rows: [["T", "T", "<span class='val-t'>T</span>"], ["T", "F", "<span class='val-f'>F</span>"], ["F", "T", "<span class='val-f'>F</span>"], ["F", "F", "<span class='val-t'>T</span>"]] }
+                            ]},
+                            { title: "Tautologies, Contradictions & Equivalence", items: [
+                                { type: "def", content: "<strong>Tautology:</strong> A statement that is always true (e.g., $R \\lor \\neg R$).<br><strong>Contradiction:</strong> A statement that is always false (e.g., $R \\land \\neg R$).<br>The negation of any tautology is a contradiction, and vice versa.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "take", content: "Two propositional statements $S_1$ and $S_2$ are <strong>logically equivalent</strong> ($S_1 \\equiv S_2$) if they have the same truth table.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "text", content: "<strong>Equivalent Statements Table:</strong> Proof of De Morgan's Law $\\neg(P \\land Q) \\equiv (\\neg P) \\lor (\\neg Q)$.<span class='hidden'></span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$(P \\land Q)$", "$\\neg(P \\land Q)$", "$\\neg P$", "$\\neg Q$", "$(\\neg P) \\lor (\\neg Q)$", "$\\neg(P \\land Q) \\leftrightarrow (\\neg P) \\lor (\\neg Q)$"], 
+                                  rows: [
+                                    ["T", "T", "T", "<span class='val-f'>F</span>", "<span class='val-f'>F</span>", "<span class='val-f'>F</span>", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>"],
+                                    ["T", "F", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>"],
+                                    ["F", "T", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>"],
+                                    ["F", "F", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>"]
+                                ]}
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "In the implication $P \\rightarrow Q$, under which condition is the statement FALSE?<span class='hidden'>[cite: 7]</span>", opts: ["P is True, Q is True", "P is True, Q is False", "P is False, Q is True", "P is False, Q is False"], ans: 1 },
+                            { q: "Which law states that $P \\rightarrow Q \\equiv \\neg P \\lor Q$?<span class='hidden'>[cite: 7]</span>", opts: ["De Morgan's Law", "Identity Law", "Law with implication", "Domination Law"], ans: 2 }
+                        ]
+                    },
+                    {
+                        id: "ch3", number: "03", icon: "∀", title: "Propositional Functions & Quantifiers",
+                        overview: "Predicates, Universal and Existential Quantifiers, and Negation rules.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "Quantifiers", items: [
+                                { type: "def", content: "<strong>Universal Quantification ($\\forall$):</strong> \"For all $x$ in the universe of discourse $P(x)$ is true.\" $\\forall x P(x)$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Existential Quantification ($\\exists$):</strong> \"There exists an $x$ for which $P(x)$ is true.\" $\\exists x P(x)$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "take", content: "<strong>Disproof by Counterexample:</strong> A counterexample to $\\forall x P(x)$ is an object $c$ so that $P(c)$ is false. Example: \"All birds can fly.\" Disproved by counterexample: Penguin.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "Negation of Quantifiers", items: [
+                                { type: "code", content: "$\\neg(\\forall x P(x)) \\equiv \\exists x (\\neg P(x))$\n$\\neg(\\exists x P(x)) \\equiv \\forall x (\\neg P(x))$<span class='hidden'>[cite: 7]</span>" },
+                                { type: "ex", content: "<strong>Examples of Negation:</strong><br>1. \"Not all roses are red\"<br>$\\neg \\forall x (\\text{Rose}(x) \\rightarrow \\text{Red}(x))$<br>$\\equiv \\exists x (\\text{Rose}(x) \\land \\neg \\text{Red}(x))$<span class='hidden'></span><br><br>2. \"Nobody is perfect\"<br>$\\neg \\exists x (\\text{Person}(x) \\land \\text{Perfect}(x))$<br>$\\equiv \\forall x (\\text{Person}(x) \\rightarrow \\neg \\text{Perfect}(x))$<span class='hidden'></span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "What is the logical equivalent of $\\neg(\\forall x P(x))$?<span class='hidden'>[cite: 7]</span>", opts: ["$\\forall x (\\neg P(x))$", "$\\exists x (\\neg P(x))$", "$\\exists x P(x)$", "None of the above"], ans: 1 }
+                        ]
+                    },
+                    {
+                        id: "ch4", number: "04", icon: "∅", title: "Set Theory",
+                        overview: "Sets, Equality, Subsets, Cardinality, Power Sets, and Cartesian Products.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "Sets & Subsets", items: [
+                                { type: "def", content: "<strong>Set:</strong> A collection of objects. Order of elements is insignificant. Repetition doesn't count. $A = \\{a_1, a_2, \\dots, a_n\\}$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "code", content: "Standard Sets:\n$\\mathbb{N} = \\{0, 1, 2, 3, \\dots\\}$\n$\\mathbb{Z} = \\{\\dots, -2, -1, 0, 1, 2, \\dots\\}$\n$\\mathbb{Q} = \\{a/b \\mid a \\in \\mathbb{Z} \\land b \\in \\mathbb{Z}^+\\}$\n$\\emptyset = \\{\\}$ (Empty set)<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Subset ($A \\subseteq B$):</strong> Every element of $A$ is also an element of $B$. $\\emptyset \\subseteq A$ for any set $A$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Proper Subset ($A \\subset B$):</strong> $A \\subseteq B$ but there is at least one element in $B$ not in $A$.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "Cardinality, Power Set & Cartesian Product", items: [
+                                { type: "def", content: "<strong>Cardinality $|S|$:</strong> Number of distinct elements in a finite set.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Power Set $P(A)$ or $2^A$:</strong> Contains all subsets of $A$. If $|A|=n$, $|P(A)| = 2^n$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Cartesian Product $A \\times B$:</strong> $A \\times B = \\{(a,b) \\mid a \\in A \\land b \\in B\\}$. $|A \\times B| = |A| \\cdot |B|$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "take", content: "Every logical expression can be transformed into an equivalent expression in set theory and vice versa.<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "If $A = \\{x, y, z\\}$, what is the cardinality of its Power Set $|P(A)|$?<span class='hidden'>[cite: 7]</span>", opts: ["3", "6", "8", "9"], ans: 2 },
+                            { q: "Which symbol represents the set of Rational Numbers?<span class='hidden'>[cite: 7]</span>", opts: ["$\\mathbb{N}$", "$\\mathbb{Z}$", "$\\mathbb{R}$", "$\\mathbb{Q}$"], ans: 3 }
+                        ]
+                    },
+                    {
+                        id: "ch5", number: "05", icon: "ƒ", title: "Functions",
+                        overview: "Domains, Ranges, Injective, Surjective, Bijective, Inversion, and Composition.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "Function Properties", items: [
+                                { type: "def", content: "A function $f: A \\rightarrow B$ is an assignment of <strong>exactly one</strong> element of $B$ to each element of $A$. $A$ is the domain, $B$ is the codomain.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>One-to-one (Injective):</strong> Does not map two distinct elements of $A$ onto the same element of $B$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Onto (Surjective):</strong> Range is its entire codomain. For every $b \\in B$ there is an $a \\in A$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Bijection (One-to-one correspondence):</strong> Both one-to-one AND onto. If finite, $|A| = |B|$.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "Inversion & Floor/Ceiling", items: [
+                                { type: "take", content: "Inversion is <strong>ONLY possible for bijections</strong> (= invertible functions). The inverse is $f^{-1}: B \\rightarrow A$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Floor $\\lfloor r \\rfloor$:</strong> Largest integer $\\le r$. (e.g., $\\lfloor 2.3 \\rfloor = 2, \\lfloor -3.5 \\rfloor = -4$).<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Ceiling $\\lceil r \\rceil$:</strong> Smallest integer $\\ge r$. (e.g., $\\lceil 2.3 \\rceil = 3, \\lceil -3.5 \\rceil = -3$).<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "Inversion ($f^{-1}$) is ONLY possible for which type of functions?<span class='hidden'>[cite: 7]</span>", opts: ["Surjective functions", "Injective functions", "Bijective functions", "Floor functions"], ans: 2 },
+                            { q: "What is the value of $\\lfloor -3.5 \\rfloor$?<span class='hidden'>[cite: 7]</span>", opts: ["-3", "-4", "-3.5", "3"], ans: 1 }
+                        ]
+                    },
+                    {
+                        id: "ch6", number: "06", icon: "⊻", title: "Boolean Algebra",
+                        overview: "Boolean operations, functions, rules, and Logic Gates.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "Boolean Operations & Functions", items: [
+                                { type: "text", content: "Boolean algebra operates on the set $B = \\{0, 1\\}$. These rules underlie electronic circuits.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "code", content: "Complement (NOT): $\\bar{0} = 1, \\bar{1} = 0$\nBoolean Sum (OR): $1+1=1, 1+0=1, 0+1=1, 0+0=0$\nBoolean Product (AND): $1\\cdot1=1, 1\\cdot0=0, 0\\cdot1=0, 0\\cdot0=0$<span class='hidden'>[cite: 7]</span>" },
+                                { type: "take", content: "There are $2^n$ different n-tuples of 0s and 1s. Therefore, there are <strong>$2^{2^n}$</strong> different Boolean functions of degree $n$.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "Logic Gates & Simplification", items: [
+                                { type: "text", content: "Electronic circuits consist of gates: OR Gate ($x+y$), AND Gate ($xy$), NOT Gate ($\\bar{x}$).<span class='hidden'>[cite: 7]</span>" },
+                                { type: "ex", content: "How can we build a circuit for $xy + (\\neg x)y$?\nSimplify: $xy + \\bar{x}y = y(x + \\bar{x}) = y(1) = y$. Thus, the circuit is simply the input $y$ itself!<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "In Boolean Algebra, what is $1 + 1$?<span class='hidden'>[cite: 7]</span>", opts: ["2", "1", "0", "10"], ans: 1 },
+                            { q: "How many different Boolean functions of degree $n$ are there?<span class='hidden'>[cite: 7]</span>", opts: ["$n^2$", "$2^n$", "$2^{2n}$", "$2^{2^n}$"], ans: 3 }
+                        ]
+                    },
+                    {
+                        id: "ch7", number: "07", icon: "Σ", title: "Sequences & Mathematical Induction",
+                        overview: "Strings, Summations, Gauss Formula, Geometric Series, and Proof by Induction.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "Sequences & Summations", items: [
+                                { type: "def", content: "A sequence is a function from a subset of $\\mathbb{N}$ to a set $S$. Finite sequences are called <strong>strings</strong>. The empty string contains no terms and has length zero.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Gauss Formula:</strong> $\\sum_{j=1}^n j = \\frac{n(n+1)}{2}$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>Geometric Series:</strong> $\\sum_{j=0}^n a^j = \\frac{a^{n+1}-1}{a-1}$.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "Mathematical Induction", items: [
+                                { type: "text", content: "Induction is a tool for PROVING a predicate is true for all natural numbers. It cannot discover theorems, only prove them.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "code", content: "1. Basis Step: Show $P(0)$ or $P(1)$ is true.\n2. Inductive Step: Assume $P(n)$, show it implies $P(n+1)$.\n3. Conclusion: $P(n)$ is true for all $n \\in \\mathbb{N}$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "ex", content: "Prove $n < 2^n$ for all positive integers.\nBasis (n=1): $1 < 2^1 = 2$ (True).\nInductive: Assume $n < 2^n$. Show $n+1 < 2^{n+1}$.\n$n+1 < 2^n + 1 < 2^n + 2^n = 2^{n+1}$. Proved.<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "Which formula represents the Gauss Formula for the sum of the first $n$ integers?<span class='hidden'>[cite: 7]</span>", opts: ["$n(n-1)/2$", "$n(n+1)/2$", "$n^2(n+1)^2/4$", "$n(n+1)(2n+1)/6$"], ans: 1 },
+                            { q: "Can Mathematical Induction be used to discover new mathematical theorems?<span class='hidden'>[cite: 7]</span>", opts: ["Yes, always", "Only for geometric series", "No, it is only used to prove them", "Yes, but only for finite sets"], ans: 2 }
+                        ]
+                    },
+                    {
+                        id: "ch9", number: "08", icon: "📖", title: "Glossary / Dictionary",
+                        overview: "A comprehensive dictionary of English technical jargon used in Discrete Mathematics.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "Core Terminology", items: [
+                                { type: "code", content: "Proposition          : قضية (جملة خبرية إما صحيحة أو خاطئة)\nPredicate / Open Sent: دالة اقتراحية / جملة مفتوحة\nNegation             : نفي (NOT)\nConjunction          : عطف (AND)\nDisjunction          : فصل (OR)\nExclusive-Or (XOR)   : فصل حصري\nImplication          : استلزام (إذا.. فإن..)\nBiconditional        : تكافؤ (إذا وفقط إذا)\nTautology            : طوطولوجيا (صحيحة دائماً)\nContradiction        : تناقض (خاطئة دائماً)\nEquivalence          : تكافؤ منطقي\nUniversal Quantifier : المكمم الشامل (لكل - $\\forall$)\nExistential Quantifier: المكمم الوجودي (يوجد - $\\exists$)\nCounterexample       : مثال مضاد\nSet                  : مجموعة\nSubset               : مجموعة جزئية\nCardinality          : العدد الأصلي (عدد العناصر)\nPower Set            : مجموعة القوى\nCartesian Product    : الجداء الديكارتي\nInjective Function   : دالة تباينية (One-to-one)\nSurjective Function  : دالة شمولية (Onto)\nBijective Function   : دالة تقابلية (تطابق واحد لواحد)\nComposition          : تركيب الدوال\nFloor / Ceiling      : دالة الأرضية / السقف\nBoolean Algebra      : الجبر البولياني\nSequence / String    : متتالية / سلسلة مسلسلة\nInduction            : استقراء رياضي<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: []
+                    }
+                ]
+            },
+            ar: {
+                app_title: "الرياضيات المتقطعة",
+                app_subtitle: "بوابة المحاضرات التفاعلية",
+                search: "ابحث عن المفاهيم...",
+                bc_home: "الرئيسية",
+                lbl_def: "📌 تعريف",
+                lbl_ex: "💡 مثال",
+                lbl_take: "🔑 خلاصة مهمة",
+                lbl_quiz: "📝 اختبار التقييم الذاتي",
+                chapters: [
+                    {
+                        id: "ch1", number: "01", icon: "🧠", title: "المنطق الاقتراحي (Propositional Logic)",
+                        overview: "يعتمد المنطق على القضايا. ندرس في هذا الجزء العبارات، قيم الحقيقة، والجمل المفتوحة.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "القضايا وقيم الحقيقة", items: [
+                                { type: "text", content: "المنطق الاقتراحي <span class='en-term'>(Propositional Logic)</span> هو نظام يعتمد على القضايا. وهو مهم جداً لتصميم البرامج والدوائر الإلكترونية.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "القضية <span class='en-term'>(Proposition)</span> هي جملة خبرية تكون إما <strong>صحيحة ($T$)</strong> أو <strong>خاطئة ($F$)</strong> (وليس كلاهما). وهذا يقابل 1 و 0 في الدوائر الرقمية.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "لعبة العبارات والقضايا", items: [
+                                { type: "ex", content: "<ul><li>\"الفيلة أكبر من الفئران.\" &rarr; عبارة؟ نعم. قضية؟ نعم. قيمة الحقيقة: <strong>صحيحة</strong>.<span class='hidden'>[cite: 7]</span></li><li>$520 < 111$ &rarr; عبارة؟ نعم. قضية؟ نعم. قيمة الحقيقة: <strong>خاطئة</strong>.<span class='hidden'>[cite: 7]</span></li><li>\"من فضلك لا تنم.\" &rarr; عبارة؟ لا، إنها طلب. قضية؟ لا.<span class='hidden'>[cite: 7]</span></li><li>\"إذا كان القمر مصنوعاً من الجبن، فسأصبح غنياً.\" &rarr; عبارة؟ نعم. قضية؟ نعم. قيمة الحقيقة: ربما صحيحة.<span class='hidden'>[cite: 7]</span></li></ul>" },
+                                { type: "def", content: "<strong>الجملة المفتوحة (دالة اقتراحية):</strong> \"$y > 5$\" هي عبارة، لكنها <strong>ليست قضية</strong>. تعتمد قيمة حقيقتها على قيمة المتغير $y$ وهي غير محددة.<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "هل تُعتبر العبارة \"$x < y$ إذا وفقط إذا كان $y > x$\" قضية؟<span class='hidden'>[cite: 7]</span>", opts: ["لا، إنها جملة مفتوحة.", "نعم، لأن قيمة حقيقتها لا تعتمد على قيم محددة لـ x و y (دائماً صحيحة).", "لا، إنها طلب.", "نعم، ولكنها خاطئة دائماً."], ans: 1 },
+                            { q: "إلى ماذا يرمز الصحيح (T) والخطأ (F) في الدوائر الرقمية؟<span class='hidden'>[cite: 7]</span>", opts: ["تشغيل وإيقاف", "1 و 0", "مرتفع ومنخفض", "جميع ما سبق"], ans: 1 }
+                        ]
+                    },
+                    {
+                        id: "ch2", number: "02", icon: "⚡", title: "الروابط المنطقية وجداول الحقيقة",
+                        overview: "فهم كيفية دمج القضايا باستخدام الروابط المنطقية وجداول الحقيقة الدقيقة (Truth Tables).<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "الروابط المنطقية وجداولها (Logical Connectives)", items: [
+                                { type: "text", content: "يمكن دمج قضية واحدة أو أكثر لتكوين قضية مركبة باستخدام العوامل (الروابط) المنطقية. نستعرض 6 عوامل أساسية.<span class='hidden'>[cite: 7]</span>" },
+                                
+                                { type: "def", content: "<strong>النفي (NOT, $\\neg$)</strong>: عامل أحادي، يقلب قيمة الحقيقة.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$\\neg P$"], rows: [["T", "<span class='val-f'>F</span>"], ["F", "<span class='val-t'>T</span>"]] },
+                                
+                                { type: "def", content: "<strong>العطف (AND, $\\land$)</strong>: عامل ثنائي. يكون صحيحاً <span class='val-t'>فقط</span> عندما يكون كلا الطرفين صحيحاً.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\land Q$"], rows: [["T", "T", "<span class='val-t'>T</span>"], ["T", "F", "<span class='val-f'>F</span>"], ["F", "T", "<span class='val-f'>F</span>"], ["F", "F", "<span class='val-f'>F</span>"]] },
+                                
+                                { type: "def", content: "<strong>الفصل (OR, $\\lor$)</strong>: عامل ثنائي. يكون صحيحاً عندما يكون طرف <span class='val-t'>واحد على الأقل</span> صحيحاً.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\lor Q$"], rows: [["T", "T", "<span class='val-t'>T</span>"], ["T", "F", "<span class='val-t'>T</span>"], ["F", "T", "<span class='val-t'>T</span>"], ["F", "F", "<span class='val-f'>F</span>"]] },
+                                
+                                { type: "def", content: "<strong>الفصل الحصري (XOR, $\\oplus$)</strong>: عامل ثنائي. يكون صحيحاً عندما يكون طرف <span class='val-t'>واحد فقط</span> صحيحاً وليس كلاهما (يحل مشكلة الغموض في اللغات الطبيعية).<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\oplus Q$"], rows: [["T", "T", "<span class='val-f'>F</span>"], ["T", "F", "<span class='val-t'>T</span>"], ["F", "T", "<span class='val-t'>T</span>"], ["F", "F", "<span class='val-f'>F</span>"]] },
+                                
+                                { type: "def", content: "<strong>الاستلزام (If-then, $\\rightarrow$)</strong>: عامل ثنائي. يكون <span class='val-f'>خاطئاً فقط</span> عندما يكون المقدم (الأول) صحيحاً والتالي (الثاني) خاطئاً.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\rightarrow Q$"], rows: [["T", "T", "<span class='val-t'>T</span>"], ["T", "F", "<span class='val-f'>F</span>"], ["F", "T", "<span class='val-t'>T</span>"], ["F", "F", "<span class='val-t'>T</span>"]] },
+                                
+                                { type: "def", content: "<strong>التكافؤ (If and only if, $\\leftrightarrow$)</strong>: يكون صحيحاً عندما يمتلك كلا الطرفين <span class='val-t'>نفس</span> قيمة الحقيقة.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$P \\leftrightarrow Q$"], rows: [["T", "T", "<span class='val-t'>T</span>"], ["T", "F", "<span class='val-f'>F</span>"], ["F", "T", "<span class='val-f'>F</span>"], ["F", "F", "<span class='val-t'>T</span>"]] }
+                            ]},
+                            { title: "الطوطولوجيا، التناقض والتكافؤ المنطقي", items: [
+                                { type: "def", content: "<strong>الطوطولوجيا <span class='en-term'>(Tautology)</span>:</strong> عبارة صحيحة دائماً (مثل $R \\lor \\neg R$).<br><strong>التناقض <span class='en-term'>(Contradiction)</span>:</strong> عبارة خاطئة دائماً (مثل $R \\land \\neg R$).<br>نفي الطوطولوجيا يعطي تناقضاً، والعكس صحيح.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "take", content: "العبارتان $S_1$ و $S_2$ <strong>متكافئتان منطقياً</strong> ($S_1 \\equiv S_2$) إذا كان لهما نفس جدول الحقيقة المطابق.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "text", content: "<strong>جدول التكافؤ المنطقي (Equivalent Statements):</strong> لإثبات التكافؤ، يمكننا بناء جدول حقيقة كامل. على سبيل المثال، إثبات قانون دي مورغان $\\neg(P \\land Q) \\equiv (\\neg P) \\lor (\\neg Q)$:<span class='hidden'></span>" },
+                                { type: "truth-table", headers: ["$P$", "$Q$", "$(P \\land Q)$", "$\\neg(P \\land Q)$", "$\\neg P$", "$\\neg Q$", "$(\\neg P) \\lor (\\neg Q)$", "$\\neg(P \\land Q) \\leftrightarrow (\\neg P) \\lor (\\neg Q)$"], 
+                                  rows: [
+                                    ["T", "T", "T", "<span class='val-f'>F</span>", "<span class='val-f'>F</span>", "<span class='val-f'>F</span>", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>"],
+                                    ["T", "F", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>"],
+                                    ["F", "T", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>"],
+                                    ["F", "F", "<span class='val-f'>F</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>", "<span class='val-t'>T</span>"]
+                                ]},
+                                { type: "code", content: "قوانين التكافؤ (Equivalence Laws):\nالهوية (Identity)   : $P \\land T \\equiv P$,  $P \\lor F \\equiv P$\nالسيطرة (Domination): $P \\lor T \\equiv T$,  $P \\land F \\equiv F$\nالتكرار (Idempotent): $P \\land P \\equiv P$,  $P \\lor P \\equiv P$\nدي مورغان (De Morgan): $\\neg(P \\land Q) \\equiv \\neg P \\lor \\neg Q$\nقانون الاستلزام     : $P \\rightarrow Q \\equiv \\neg P \\lor Q$<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "في عملية الاستلزام $P \\rightarrow Q$، متى تكون العبارة خاطئة؟<span class='hidden'>[cite: 7]</span>", opts: ["P صحيحة و Q صحيحة", "P صحيحة و Q خاطئة", "P خاطئة و Q صحيحة", "P خاطئة و Q خاطئة"], ans: 1 },
+                            { q: "حسب قوانين التكافؤ، العبارة $P \\rightarrow Q$ تكافئ منطقياً:<span class='hidden'>[cite: 7]</span>", opts: ["$\\neg P \\land Q$", "$\\neg P \\lor Q$", "$P \\lor \\neg Q$", "$\\neg(P \\lor Q)$"], ans: 1 }
+                        ]
+                    },
+                    {
+                        id: "ch3", number: "03", icon: "∀", title: "الدوال الاقتراحية والمكممات",
+                        overview: "المسندات، المكمم الشامل، المكمم الوجودي وقواعد النفي.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "المُكَمِّمَات (Quantifiers)", items: [
+                                { type: "def", content: "<strong>المكمم الشامل ($\\forall$):</strong> يعني 'لكل $x$ في مجال الخطاب الدالة $P(x)$ صحيحة'. يُكتب $\\forall x P(x)$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>المكمم الوجودي ($\\exists$):</strong> يعني 'يوجد $x$ (واحد على الأقل) يحقق $P(x)$'. يُكتب $\\exists x P(x)$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "take", content: "<strong>الدحض بمثال مضاد <span class='en-term'>(Counterexample)</span>:</strong> لدحض العبارة $\\forall x P(x)$، يكفي إيجاد كائن $c$ يجعل $P(c)$ خاطئة. مثال: لدحض 'كل الطيور تطير'، نذكر طائر البطريق كمثال مضاد.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "نفي المكممات (قانون دي مورغان)", items: [
+                                { type: "code", content: "$\\neg(\\forall x P(x)) \\equiv \\exists x (\\neg P(x))$\n$\\neg(\\exists x P(x)) \\equiv \\forall x (\\neg P(x))$<span class='hidden'>[cite: 7]</span>" },
+                                { type: "ex", content: "<strong>أمثلة على نفي المكممات:</strong><br><br>1. \"ليست كل الورود حمراء\" (Not all roses are red)<br>$\\neg \\forall x (\\text{Rose}(x) \\rightarrow \\text{Red}(x))$<br>$\\equiv \\exists x (\\text{Rose}(x) \\land \\neg \\text{Red}(x))$<span class='hidden'></span><br><br>2. \"لا أحد مثالي\" (Nobody is perfect)<br>$\\neg \\exists x (\\text{Person}(x) \\land \\text{Perfect}(x))$<br>$\\equiv \\forall x (\\text{Person}(x) \\rightarrow \\neg \\text{Perfect}(x))$<span class='hidden'></span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "ما هو المكافئ المنطقي لـ $\\neg(\\forall x P(x))$؟<span class='hidden'>[cite: 7]</span>", opts: ["$\\forall x (\\neg P(x))$", "$\\exists x (\\neg P(x))$", "$\\exists x P(x)$", "لا شيء مما سبق"], ans: 1 }
+                        ]
+                    },
+                    {
+                        id: "ch4", number: "04", icon: "∅", title: "نظرية المجموعات (Set Theory)",
+                        overview: "المجموعات، التساوي، المجموعات الجزئية، العدد الأصلي ومجموعة القوى.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "المجموعات (Sets)", items: [
+                                { type: "def", content: "<strong>المجموعة <span class='en-term'>(Set)</span>:</strong> تجميع لعناصر غير مرتبة. ترتيب العناصر غير مهم، والتكرار لا يُحسب. $A = \\{a_1, a_2, \\dots, a_n\\}$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "code", content: "المجموعات القياسية (Standard Sets):\n$\\mathbb{N} = \\{0, 1, 2, 3, \\dots\\}$ (أعداد طبيعية)\n$\\mathbb{Z} = \\{\\dots, -2, -1, 0, 1, 2, \\dots\\}$ (أعداد صحيحة)\n$\\mathbb{Q} = \\{a/b \\mid a \\in \\mathbb{Z} \\land b \\in \\mathbb{Z}^+\\}$ (أعداد نسبية)\n$\\emptyset = \\{\\}$ (مجموعة فارغة)<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>المجموعة الجزئية ($A \\subseteq B$):</strong> كل عنصر في $A$ هو أيضاً عنصر في $B$. تذكر أن $\\emptyset \\subseteq A$ لأي مجموعة $A$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>المجموعة الجزئية الفعلية ($A \\subset B$):</strong> $A \\subseteq B$ ولكن يوجد عنصر واحد على الأقل في $B$ غير موجود في $A$.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "العدد الأصلي ومجموعة القوى", items: [
+                                { type: "def", content: "<strong>العدد الأصلي <span class='en-term'>(Cardinality - $|S|$)</span>:</strong> هو عدد العناصر المستقلة (غير المكررة) في المجموعة.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>مجموعة القوى <span class='en-term'>($P(A)$ أو $2^A$)</span>:</strong> تحتوي على جميع المجموعات الجزئية من $A$. إذا كان $|A|=n$، فإن $|P(A)| = 2^n$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>الجداء الديكارتي ($A \\times B$):</strong> $A \\times B = \\{(a,b) \\mid a \\in A \\land b \\in B\\}$. والعدد الأصلي له $|A \\times B| = |A| \\cdot |B|$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "take", content: "كل تعبير منطقي يمكن تحويله إلى تعبير مكافئ في نظرية المجموعات (مثال: False يكافئ $\\emptyset$، و True يكافئ $U$، و $A \\land B$ تكافئ $A \\cap B$).<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "إذا كانت المجموعة $A = \\{x, y, z\\}$، فما هو العدد الأصلي لمجموعة القوى $|P(A)|$؟<span class='hidden'>[cite: 7]</span>", opts: ["3", "6", "8", "9"], ans: 2 },
+                            { q: "أي رمز من الرموز التالية يمثل مجموعة الأعداد النسبية (Rational Numbers)؟<span class='hidden'>[cite: 7]</span>", opts: ["$\\mathbb{N}$", "$\\mathbb{Z}$", "$\\mathbb{R}$", "$\\mathbb{Q}$"], ans: 3 }
+                        ]
+                    },
+                    {
+                        id: "ch5", number: "05", icon: "ƒ", title: "الدوال (Functions)",
+                        overview: "المجال، المدى، الدوال التباينية، الشمولية، التقابلية، وعكس الدوال.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "خصائص الدوال", items: [
+                                { type: "def", content: "الدالة $f: A \\rightarrow B$ هي تعيين <strong>لعنصر واحد بالضبط</strong> من $B$ لكل عنصر في $A$. $A$ يسمى المجال (Domain) و $B$ المجال المقابل (Codomain).<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>دالة تباينية <span class='en-term'>(One-to-one / Injective)</span>:</strong> لا تُعين عنصرين مختلفين من $A$ لنفس العنصر في $B$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>دالة شمولية <span class='en-term'>(Onto / Surjective)</span>:</strong> مداها يغطي المجال المقابل بالكامل. لكل $b \\in B$ يوجد $a \\in A$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>دالة تقابلية <span class='en-term'>(Bijection)</span>:</strong> تباينية وشمولية معاً. وإذا كانت المجموعات منتهية فإن $|A| = |B|$.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "عكس الدوال (Inversion) والأرضية/السقف", items: [
+                                { type: "take", content: "تكوين دالة عكسية ($f^{-1}$) <strong>ممكن فقط للدوال التقابلية (Bijections)</strong>.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>دالة الأرضية (Floor $\\lfloor r \\rfloor$):</strong> أكبر عدد صحيح أصغر من أو يساوي $r$. (مثال: $\\lfloor 2.3 \\rfloor = 2$، $\\lfloor -3.5 \\rfloor = -4$).<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>دالة السقف (Ceiling $\\lceil r \\rceil$):</strong> أصغر عدد صحيح أكبر من أو يساوي $r$. (مثال: $\\lceil 2.3 \\rceil = 3$، $\\lceil -3.5 \\rceil = -3$).<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "إيجاد الدالة العكسية ($f^{-1}$) ممكن حصرياً لأي نوع من الدوال؟<span class='hidden'>[cite: 7]</span>", opts: ["الدوال الشمولية (Surjective)", "الدوال التباينية (Injective)", "الدوال التقابلية (Bijective)", "لا شيء مما سبق"], ans: 2 },
+                            { q: "ما هي قيمة دالة الأرضية $\\lfloor -3.5 \\rfloor$؟<span class='hidden'>[cite: 7]</span>", opts: ["-3", "-4", "-3.5", "3"], ans: 1 }
+                        ]
+                    },
+                    {
+                        id: "ch6", number: "06", icon: "⊻", title: "الجبر البولياني (Boolean Algebra)",
+                        overview: "العمليات البوليانية، القواعد، البوابات المنطقية وتبسيط الدوائر.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "العمليات البوليانية", items: [
+                                { type: "text", content: "الجبر البولياني يعمل على المجموعة $B = \\{0, 1\\}$. وهي القواعد التي تقوم عليها الدوائر الإلكترونية.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "code", content: "المكمل (NOT): $\\bar{0} = 1, \\bar{1} = 0$\nالجمع البولياني (OR): $1+1=1, 1+0=1, 0+1=1, 0+0=0$\nالضرب البولياني (AND): $1\\cdot1=1, 1\\cdot0=0, 0\\cdot1=0, 0\\cdot0=0$<span class='hidden'>[cite: 7]</span>" },
+                                { type: "take", content: "يوجد $2^n$ من المجموعات المختلفة للـ 0 و 1. وبناءً عليه يوجد <strong>$2^{2^n}$</strong> دوال بوليانية مختلفة من الدرجة $n$.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "البوابات المنطقية والتبسيط (Logic Gates)", items: [
+                                { type: "text", content: "تتكون الدوائر الإلكترونية من بوابات (Gates): بوابة OR ($x+y$)، بوابة AND ($xy$)، وبوابة NOT ($\\bar{x}$).<span class='hidden'>[cite: 7]</span>" },
+                                { type: "ex", content: "كيف نبني دائرة للمعادلة $xy + (\\neg x)y$؟\nالتبسيط: $xy + \\bar{x}y = y(x + \\bar{x}) = y(1) = y$. إذن الدائرة تُختزل لتكون السلك $y$ فقط!<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "في الجبر البولياني، ناتج العملية $1 + 1$ هو:<span class='hidden'>[cite: 7]</span>", opts: ["2", "1", "0", "10"], ans: 1 },
+                            { q: "كم عدد الدوال البوليانية المختلفة من الدرجة $n$؟<span class='hidden'>[cite: 7]</span>", opts: ["$n^2$", "$2^n$", "$2^{2n}$", "$2^{2^n}$"], ans: 3 }
+                        ]
+                    },
+                    {
+                        id: "ch7", number: "07", icon: "Σ", title: "المتتاليات والاستقراء الرياضي",
+                        overview: "المتسلسلات، المجاميع، صيغة غاوس، والإثبات بالاستقراء الرياضي.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "المتتاليات والمجاميع (Sequences & Summations)", items: [
+                                { type: "def", content: "المتتالية هي دالة من مجموعة جزئية من $\\mathbb{N}$ إلى مجموعة $S$. المتتاليات المنتهية تسمى <strong>سلاسل (Strings)</strong>. السلسلة الفارغة لا تحتوي على حدود وطولها صفر.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>صيغة غاوس <span class='en-term'>(Gauss Formula)</span>:</strong> $\\sum_{j=1}^n j = \\frac{n(n+1)}{2}$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "def", content: "<strong>المتسلسلة الهندسية <span class='en-term'>(Geometric Series)</span>:</strong> $\\sum_{j=0}^n a^j = \\frac{a^{n+1}-1}{a-1}$.<span class='hidden'>[cite: 7]</span>" }
+                            ]},
+                            { title: "الاستقراء الرياضي (Mathematical Induction)", items: [
+                                { type: "text", content: "الاستقراء هو أداة <strong>لإثبات</strong> صحة مسند رياضي لجميع الأعداد الطبيعية. لا يمكنه اكتشاف نظريات جديدة، بل يُستخدم للإثبات فقط.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "code", content: "خطوات الإثبات بالاستقراء:\n1. خطوة الأساس (Basis): أثبت صحة $P(0)$ أو $P(1)$.\n2. خطوة الاستقراء (Inductive): افترض صحة $P(n)$، وأثبت أنها تؤدي لصحة $P(n+1)$.\n3. الاستنتاج: إذن $P(n)$ صحيحة لجميع $n \\in \\mathbb{N}$.<span class='hidden'>[cite: 7]</span>" },
+                                { type: "ex", content: "أثبت أن $n < 2^n$ لجميع الأعداد الصحيحة الموجبة.\nالأساس (n=1): $1 < 2^1 = 2$ (صحيح).\nالاستقراء: نفترض $n < 2^n$. ونريد إثبات $n+1 < 2^{n+1}$.\n$n+1 < 2^n + 1 < 2^n + 2^n = 2^{n+1}$. (تم الإثبات).<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: [
+                            { q: "أي معادلة تمثل صيغة غاوس (Gauss Formula) لمجموع أول $n$ من الأعداد؟<span class='hidden'>[cite: 7]</span>", opts: ["$n(n-1)/2$", "$n(n+1)/2$", "$n^2(n+1)^2/4$", "$n(n+1)(2n+1)/6$"], ans: 1 },
+                            { q: "هل يمكن استخدام الاستقراء الرياضي لاكتشاف نظريات رياضية جديدة؟<span class='hidden'>[cite: 7]</span>", opts: ["نعم، دائماً", "فقط في المتسلسلات الهندسية", "لا، يُستخدم فقط لإثبات النظريات", "نعم، ولكن للمجموعات المنتهية فقط"], ans: 2 }
+                        ]
+                    },
+                    {
+                        id: "ch9", number: "08", icon: "📖", title: "قاموس المصطلحات (Glossary)",
+                        overview: "قاموس شامل وحصري للمصطلحات التقنية الإنجليزية المُستخدمة في مادة الرياضيات المتقطعة.<span class='hidden'>[cite: 7]</span>",
+                        sections: [
+                            { title: "المصطلحات الأساسية (Core Terminology)", items: [
+                                { type: "code", content: "Proposition          : قضية (جملة خبرية إما صحيحة أو خاطئة)\nPredicate / Open Sent: دالة اقتراحية / جملة مفتوحة\nNegation             : نفي (NOT)\nConjunction          : عطف (AND)\nDisjunction          : فصل (OR)\nExclusive-Or (XOR)   : فصل حصري\nImplication          : استلزام (إذا.. فإن..)\nBiconditional        : تكافؤ (إذا وفقط إذا)\nTautology            : طوطولوجيا (صحيحة دائماً)\nContradiction        : تناقض (خاطئة دائماً)\nEquivalence          : تكافؤ منطقي\nUniversal Quantifier : المكمم الشامل (لكل - $\\forall$)\nExistential Quantifier: المكمم الوجودي (يوجد - $\\exists$)\nCounterexample       : مثال مضاد\nSet                  : مجموعة\nSubset               : مجموعة جزئية\nCardinality          : العدد الأصلي (عدد العناصر)\nPower Set            : مجموعة القوى\nCartesian Product    : الجداء الديكارتي\nInjective Function   : دالة تباينية (One-to-one)\nSurjective Function  : دالة شمولية (Onto)\nBijective Function   : دالة تقابلية (تطابق واحد لواحد)\nComposition          : تركيب الدوال\nFloor / Ceiling      : دالة الأرضية / السقف\nBoolean Algebra      : الجبر البولياني\nSequence / String    : متتالية / سلسلة (نص)\nInduction            : استقراء رياضي<span class='hidden'>[cite: 7]</span>" }
+                            ]}
+                        ],
+                        quiz: []
+                    }
+                ]
+            }
+        };
+
+        // =========================================================================
+        // ENGINE LOGIC
+        // =========================================================================
+        let currentLang = 'ar';
+        let activeChapter = 'ch1';
+
+        const sidebarEl = document.getElementById('sidebar');
+        const mainContentEl = document.getElementById('mainContent');
+        const sidebarNavEl = document.getElementById('sidebarNav');
+        const pageContentEl = document.getElementById('pageContent');
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('langBtnText').textContent = lang === 'en' ? 'عربي' : 'English';
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(contentData[lang][key]) el.textContent = contentData[lang][key];
+            });
+
+            renderSidebar();
+            renderPage(activeChapter);
+        }
+
+        function toggleSidebar(state) {
+            if (window.innerWidth <= 768) {
+                const open = state !== undefined ? state : !sidebarEl.classList.contains('open-mobile');
+                sidebarEl.classList.toggle('open-mobile', open);
+                document.getElementById('sidebarOverlay').style.display = open ? 'block' : 'none';
+            } else {
+                const closed = state !== undefined ? !state : !sidebarEl.classList.contains('closed');
+                sidebarEl.classList.toggle('closed', closed);
+                mainContentEl.classList.toggle('expanded', closed);
+            }
+        }
+
+        function renderSidebar() {
+            const data = contentData[currentLang];
+            sidebarNavEl.innerHTML = '';
+            data.chapters.forEach(ch => {
+                const btn = document.createElement('button');
+                btn.className = `nav-btn ${activeChapter === ch.id ? 'active' : ''}`;
+                btn.innerHTML = `<span class="flex items-center gap-2"><span class="text-lg">${ch.icon}</span> <span>${ch.number}. ${ch.title}</span></span>`;
+                btn.onclick = () => {
+                    activeChapter = ch.id;
+                    renderSidebar();
+                    renderPage(ch.id);
+                    if(window.innerWidth <= 768) toggleSidebar(false);
+                    window.scrollTo(0,0);
+                };
+                sidebarNavEl.appendChild(btn);
+            });
+        }
+
+        function renderPage(chId) {
+            const data = contentData[currentLang];
+            const chapter = data.chapters.find(c => c.id === chId);
+            if(!chapter) return;
+
+            document.getElementById('topBreadcrumb').innerHTML = `
+                <span class="opacity-60">${data.bc_home}</span> <span class="mx-1">/</span> <span class="text-accent-blue">${chapter.title}</span>
+            `;
+
+            let html = `
+                <div class="mb-10 border-b border-border-subtle pb-6">
+                    <span class="inline-block px-3 py-1 bg-accent-blue/10 text-accent-blue text-xs font-bold rounded-full mb-4 uppercase tracking-wider">Module ${chapter.number}</span>
+                    <h1 class="text-3xl font-extrabold text-text-primary mb-3 leading-tight">${chapter.icon} ${chapter.title}</h1>
+                    <p class="text-text-secondary text-lg leading-relaxed">${chapter.overview}</p>
+                </div>
+            `;
+
+            chapter.sections.forEach(sec => {
+                html += `<div class="mb-12"><h2 class="text-2xl font-bold text-text-primary mb-6">${sec.title}</h2>`;
+                sec.items.forEach(item => {
+                    if(item.type === 'text') html += `<p class="mb-4 text-text-secondary">${item.content}</p>`;
+                    else if(item.type === 'def') html += `<div class="box box-def"><strong class="text-accent-blue block mb-1">${data.lbl_def}</strong>${item.content}</div>`;
+                    else if(item.type === 'ex') html += `<div class="box box-ex"><strong class="text-accent-violet block mb-1">${data.lbl_ex}</strong>${item.content}</div>`;
+                    else if(item.type === 'take') html += `<div class="box box-take"><strong class="text-status-success block mb-1">${data.lbl_take}</strong>${item.content}</div>`;
+                    else if(item.type === 'code') html += `<div class="code-block mb-4">${item.content}</div>`;
+                    else if(item.type === 'truth-table') {
+                        html += `<div class="truth-table-container" dir="ltr"><table class="truth-table"><thead><tr>${item.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${item.rows.map(row=>`<tr>${row.map(cell=>`<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+                    }
+                });
+                html += `</div>`;
+            });
+
+            if(chapter.quiz && chapter.quiz.length > 0) {
+                html += `<div class="mt-16 pt-8 border-t border-border-subtle"><h2 class="text-2xl font-bold text-accent-violet mb-6">${data.lbl_quiz}</h2><div class="space-y-6">`;
+                chapter.quiz.forEach((q, idx) => {
+                    html += `<div class="bg-bg-elevated p-6 rounded-xl border border-border-subtle" id="qblock-${idx}">
+                        <h4 class="font-bold text-lg mb-4 text-text-primary">${idx+1}. ${q.q}</h4><div class="space-y-3">`;
+                    q.opts.forEach((opt, optIdx) => {
+                        html += `<div class="quiz-option" onclick="checkAnswer(${idx}, ${optIdx}, ${q.ans})">
+                            <span class="w-5 h-5 rounded-full border border-border-strong flex-shrink-0 flex items-center justify-center font-bold text-xs"></span>
+                            <span class="flex-1">${opt}</span>
+                        </div>`;
+                    });
+                    html += `</div><div class="mt-4 font-bold text-sm hidden feedback-msg"></div></div>`;
+                });
+                html += `</div></div>`;
+            }
+
+            pageContentEl.innerHTML = html;
+            
+            // Typeset MathJax properly
+            if(window.MathJax) {
+                MathJax.typesetPromise([pageContentEl]).catch((err) => console.log(err.message));
+            }
+        }
+
+        function checkAnswer(qIdx, selectedIdx, correctIdx) {
+            const block = document.getElementById(`qblock-${qIdx}`);
+            const opts = block.querySelectorAll('.quiz-option');
+            const msg = block.querySelector('.feedback-msg');
+
+            opts.forEach((opt, idx) => {
+                opt.style.pointerEvents = 'none'; // lock
+                const circle = opt.querySelector('span:first-child');
+                if(idx === correctIdx) {
+                    opt.classList.add('correct');
+                    circle.innerHTML = '✓';
+                    circle.classList.add('bg-status-success', 'border-status-success', 'text-bg-base');
+                } else if(idx === selectedIdx) {
+                    opt.classList.add('wrong');
+                    circle.innerHTML = '✗';
+                    circle.classList.add('bg-status-error', 'border-status-error', 'text-bg-base');
+                }
+            });
+
+            msg.style.display = 'block';
+            if(selectedIdx === correctIdx) {
+                msg.textContent = currentLang === 'en' ? '✅ Correct Answer!' : '✅ إجابة صحيحة!';
+                msg.className = "mt-4 font-bold text-sm text-status-success block";
+            } else {
+                msg.textContent = currentLang === 'en' ? '❌ Incorrect.' : '❌ إجابة خاطئة.';
+                msg.className = "mt-4 font-bold text-sm text-status-error block";
+            }
+        }
+
+        // Init App
+        switchLanguage('ar');
+
+    </script>
+</body>
+</html>
