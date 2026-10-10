@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استعلام نتائج الامتحانات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">استعلام النتائج</h1>
+        
+        <!-- حقل البحث مع زر التبديل (Dropdown) -->
+        <div class="flex flex-col sm:flex-row gap-2 mb-6">
+            <select id="searchMode" class="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700">
+                <option value="starts_with">بداية الاسم</option>
+                <option value="contains">أي تطابق</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="أدخل رقم الجلوس أو الاسم..." 
+                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="startSearch()" id="searchBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition duration-200">
+                بحث
+            </button>
+        </div>
+
+        <div id="loading" class="hidden text-center text-gray-500 my-4">جاري البحث وتحليل البيانات...</div>
+        
+        <div id="searchStats" class="hidden text-md font-semibold text-blue-700 bg-blue-50 p-3 rounded-lg mb-4 text-center border border-blue-200"></div>
+
+        <div id="resultArea" class="hidden space-y-4"></div>
+
+        <div class="text-center mt-6">
+            <button onclick="loadMore()" id="loadMoreBtn" class="hidden bg-gray-800 hover:bg-gray-900 text-white px-6 py-2 rounded-lg font-semibold transition duration-200 w-full sm:w-auto">
+                عرض 10 طلاب آخرين ↓
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // === بيانات مشروعك ===
+        const SUPABASE_URL = 'https://wxalmjkwstlstzktnuyz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4YWxtamt3c3Rsc3R6a3RudXl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTMwMTcsImV4cCI6MjEwNDgyOTAxN30.Dr_W7B0hI9VuvlAUHHUiw_UP9gKAHttOB6Wq5cxIoG8';
+        // ======================
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentPage = 1;
+        let currentSearchTerm = '';
+        let currentSearchMode = 'starts_with';
+        let totalMatchesFound = 0;
+        let loadedMatches = 0;
+
+        async function startSearch() {
+            const input = document.getElementById('searchInput').value.trim();
+            if (!input) return;
+
+            currentSearchTerm = input;
+            currentSearchMode = document.getElementById('searchMode').value; // حفظ نوع البحث الحالي
+            currentPage = 1;
+            loadedMatches = 0;
+            document.getElementById('resultArea').innerHTML = '';
+            
+            await fetchResults();
+        }
+
+        async function loadMore() {
+            currentPage++;
+            await fetchResults();
+        }
+
+        async function fetchResults() {
+            const resultArea = document.getElementById('resultArea');
+            const loading = document.getElementById('loading');
+            const searchBtn = document.getElementById('searchBtn');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const searchStats = document.getElementById('searchStats');
+
+            loading.classList.remove('hidden');
+            searchBtn.disabled = true;
+            loadMoreBtn.classList.add('hidden');
+
+            try {
+                // إرسال نوع البحث (search_mode) إلى الدالة
+                const { data, error } = await supabaseClient.rpc('get_student_stats', { 
+                    search_term: currentSearchTerm,
+                    page_num: currentPage,
+                    page_size: 10,
+                    search_mode: currentSearchMode
+                });
+
+                if (error) throw error;
+
+                if (data.error) {
+                    showError(data.error);
+                    searchStats.classList.add('hidden');
+                } else {
+                    totalMatchesFound = data.total_matches;
+                    loadedMatches += data.matches.length;
+                    
+                    searchStats.innerHTML = `تم العثور على (<strong>${totalMatchesFound.toLocaleString()}</strong>) نتيجة مطابقة. يتم عرض (<strong>${loadedMatches}</strong>).`;
+                    searchStats.classList.remove('hidden');
+                    
+                    appendMatches(data.matches);
+
+                    if (loadedMatches < totalMatchesFound) {
+                        loadMoreBtn.classList.remove('hidden');
+                    }
+                }
+            } catch (err) {
+                showError('حدث خطأ في الاتصال بقاعدة البيانات.');
+                console.error(err);
+            } finally {
+                loading.classList.add('hidden');
+                searchBtn.disabled = false;
+            }
+        }
+
+        function appendMatches(matches) {
+            const resultArea = document.getElementById('resultArea');
+            
+            let htmlContent = '';
+            matches.forEach(item => {
+                const student = item.student;
+                if (item.status === 'نجاح') {
+                    htmlContent += `
+                        <div class="border-t-4 border-green-500 bg-green-50 p-6 rounded-lg shadow-sm">
+                            <h2 class="text-xl font-bold text-green-700 mb-1">${student.name}</h2>
+                            <p class="text-gray-600 text-sm mb-3">رقم الجلوس: <strong>${student.seat_no}</strong></p>
+                            <div class="grid grid-cols-2 gap-4 text-center mb-4">
+                                <div class="bg-white p-2 rounded shadow-sm border border-green-100">
+                                    <span class="block text-xs text-gray-500">النتيجة</span>
+                                    <span class="block text-lg font-bold text-green-600">${student.status}</span>
+                                </div>
+                                <div class="bg-white p-2 rounded shadow-sm border border-green-100">
+                                    <span class="block text-xs text-gray-500">النسبة المئوية</span>
+                                    <span class="block text-lg font-bold text-gray-800">${student.percentage}%</span>
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded shadow-inner text-xs text-gray-700 border border-gray-100">
+                                <p class="mb-1">🏆 الترتيب: <strong>المركز ${item.rank.toLocaleString()}</strong> من أصل ${item.total_passed.toLocaleString()} ناجح.</p>
+                                <p>⭐ الأداء: ضمن <strong>أفضل ${item.top_percentage}%</strong> من الناجحين.</p>
+                            </div>
+                        </div>`;
+                } else {
+                    htmlContent += `
+                        <div class="border-t-4 border-red-500 bg-red-50 p-6 rounded-lg shadow-sm">
+                            <h2 class="text-xl font-bold text-red-700 mb-1">${student.name}</h2>
+                            <p class="text-gray-600 text-sm mb-3">رقم الجلوس: <strong>${student.seat_no}</strong></p>
+                            <div class="grid grid-cols-2 gap-4 text-center mb-4">
+                                <div class="bg-white p-2 rounded shadow-sm border border-red-100">
+                                    <span class="block text-xs text-gray-500">النتيجة</span>
+                                    <span class="block text-lg font-bold text-red-600">${student.status}</span>
+                                </div>
+                                <div class="bg-white p-2 rounded shadow-sm border border-red-100">
+                                    <span class="block text-xs text-gray-500">النسبة المحققة</span>
+                                    <span class="block text-lg font-bold text-gray-800">${student.percentage}%</span>
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded shadow-inner text-xs text-gray-700 border border-gray-100">
+                                <p class="mb-1">📊 إحصائيات عامة: عدد الراسبين الكلي هو <strong>${item.failed_students.toLocaleString()}</strong> طالب.</p>
+                                <p>📉 نسبة الرسوب تشكل <strong>${item.failure_rate}%</strong> من إجمالي ${item.total_students.toLocaleString()} ممتحن.</p>
+                            </div>
+                        </div>`;
+                }
+            });
+
+            resultArea.insertAdjacentHTML('beforeend', htmlContent);
+            resultArea.classList.remove('hidden');
+        }
+
+        function showError(msg) {
+            const resultArea = document.getElementById('resultArea');
+            resultArea.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded"><p class="font-bold">عذراً</p><p>${msg}</p></div>`;
+            resultArea.classList.remove('hidden');
+            document.getElementById('searchStats').classList.add('hidden');
+            document.getElementById('loadMoreBtn').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
