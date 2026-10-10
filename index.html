@@ -3,164 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-   body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #290b06 100%);
-            background-repeat: no-repeat;
-            background-attachment: fixed; 
-            color: white;
-            font-family: 'Courier New', Courier, monospace; 
-        }
-            .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white !important;
-            transition: transform 0.3s ease;
-        }
-      .glass-card:hover {
-            transform: translateY(-10px);
-            border-color: chocolate;
-        }
-
-        .navbar-brand { color: chocolate !important; font-weight: bold; }
-        .nav-link { color: rgba(255,255,255,0.7) !important; }
-        .nav-link.active { color: chocolate !important; border-bottom: 2px solid chocolate; }
-          .profile-img {
-            border-radius: 30% !important;
-            border: 3px solid chocolate;
-            box-shadow: 0 0 20px rgba(210, 105, 30, 0.3);
-        }
-        
-        </style>
-    <title>Main</title>
+    <meta name="description" content="Muaaz Yasir (Mzodkn) - Cyber Security Enthusiast Portfolio">
+    <title>Mzodkn | Cyber Security</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+    
 </head>
-<body>              <!-----------nav of the page----------------->
-  <nav class="navbar navbar-expand-lg navbar-dark py-4" >
-    <div class="container ">
-          <a class="navbar-brand" >MZODKN <span class="text-white">_</span></a>
-         <div class="collapse navbar-collapse">
+<body>              
+  
+  <nav class="navbar navbar-expand-lg navbar-dark py-3">
+    <div class="container">
+        <a class="navbar-brand" href="#">MZODKN<span class="text-white">_</span></a>
+        <button class="navbar-toggler" type="button" 
+        data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">    
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link active" href="index.html">HOME</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">ABOUT</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about">ABOUT</a></li>
+                <li class="nav-item"><a class="nav-link" href="#projects">PROJECTS</a></li>
                 <li class="nav-item"><a class="nav-link" href="cert.html">CERTIFICATES</a></li>
             </ul>
         </div>
-        </div>
+    </div>
   </nav>
   
-  <!-------------------About -------------------->
-  <div class="container mt-5">
+  <div id="about" class="container mt-5">
     <div class="row align-items-center text-center text-md-start">
         <div class="col-md-4 mb-4 mb-md-0">
-            <img src="img/pro.jpeg" class="img-fluid profile-img d-block mx-auto" alt="Profile">
+            <div class="profile-wrapper">
+                <img src="img/pro.jpeg" class="img-fluid profile-img d-block mx-auto" alt="Mzodkn Profile">
+            </div>
         </div>
-     <div class="col-md-8" >
-     <h1 style="color: chocolate;"> Welcome to my site  v0.2 </h1>
-         <div class=" glass-card p-4   ">
-      <p class="mb-0">Hi, I am Muaaz Yasir ("Mzodkn"). Addicted to technology, self-learner, and hopefully, I will find a scholarship to study Computer Science. 
-                <br>
-                Despite the challenging situations my country has faced over the past two years, I have remained committed to my professional growth.
-                I have gained extensive knowledge through both certified courses and hands-on, real-world scenarios. As we approach 2026 at the time of typing ,
-                my primary goal is to achieve the HackTheBox Certified Penetration Tester (CPTS) designation. I am fully aware of its rigor, but I am confident in my ability to master it
-                <span class="text-info">>> Patient about: Cyber Security, Networks, and Programming.</span></p>
+        <div class="col-md-8">
+            <h1 class="tech-font text-accent">Welcome to my site v0.3</h1>
+<div class="glass-card p-4 mt-3 text-start">
+                
+                <div class="tech-font mt-2">
+                    
+                    <div class="text-accent d-flex align-items-center">
+                        <strong class="me-2">moz@mzodkn:~#</strong>
+                        <span class="cmd-1 text-white">cat AboutMe.txt</span>
+                    </div>
+                    
+                    <div class="output-1 text-muted mt-2 ms-3" style="line-height: 1.8;">
+                        <p class="mb-2">> Hi, I am Muaaz Yasir ("Mzodkn"). Addicted to technology, self learner.</p>
+                        <p class="mb-3">> Despite the challenging situations my country has faced, over the past two years, I have grown my skills. I have gained extensive knowledge through both certified courses and hands-on, real-world scenarios. In 2026, my primary goal is to achieve the <strong><u>knowledge of</u></strong> <strong class="text-white tech-font">HackTheBox Certified Penetration Tester (CPTS) | Offensive Security Certified Professional (OSCP)</strong> designation. I am fully aware of its rigor, but I am confident in my ability to master it.</p>
+                    </div>
 
+             
+                    <div class="output-1 text-accent d-flex align-items-center mt-3">
+                        <strong class="me-2">moz@mzodkn:~#</strong>
+                        <span class="cmd-2-loop text-white">cat passion.txt</span>
+                    </div>
+                    
+                    <div class="output-2-loop text-muted mt-2 ms-3" style="line-height: 1.8;">
+                        > CyberSecurity & Networks<br>
+                        > Programming & Automation<br>
+                        > Bug Hunting & Pentesting<br>
+                        > Arch user BTW 
+                        <div class="mt-2 text-accent">
+                            <strong>moz@mzodkn:~#</strong><span class="final-cursor"></span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="mt-4 d-flex flex-wrap gap-2 justify-content-center justify-content-md-start align-items-center">
+                <span class="custom-badge">🏆 Top 3% TryHackMe</span>
+                <span class="custom-badge">🛡️ eJPT Knowledge</span>
+                <span class="custom-badge">🌐 CCNA</span>
+                <span class="custom-badge">🖥️ sys Administration </span>
+
+            </div>
         </div>
     </div>
-</div>
-</div>
+  </div>
 
-
-            <!--Skills-->
-      <div class="container mt-5 pt-5">
-        <h2 class="  text-center MB-5 pt-3 border-bottom pb-3" style="color: chocolate;" >MY SKILS </h2>
-        <div class=" row row-cols-2 row-cols-lg-4 justify-content-center mb-5 pb-5 pt-5 g-4  " >
-            
-            <div class="col ">
-        <div class="card glass-card h-100" >
-             <div class="card-header  text-center fw-bold">            Cyber Security
-             </div>
-              <img src="img/cs.jpeg" class="card-img-top p-2" >
-              <div class="card-body">
-                <ul class="small ps-3">
-                        <li>Top 6% on TryHackMe</li>
+  <div class="container mt-5 pt-4">
+    <h2 class="text-center mb-4 pt-3 border-bottom border-secondary pb-3 tech-font text-accent">MY SKILLS</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 justify-content-center mb-5 g-4">
+        
+        <div class="col">
+            <div class="card glass-card h-100 border-0">
+                <div class="card-header text-center fw-bold tech-font">Cyber Security</div>
+                <img src="img/cs.jpeg" class="card-img-top" alt="Cyber Security">
+                <div class="card-body">
+                    <ul class="small ps-3 text-muted mb-0">
+                        <li>Top 3% on TryHackMe</li>
                         <li>eJPT Knowledge</li>
-                        <li>Web Vulnerabilities(Bug hunting)</li>
+                        <li>Web Vulnerabilities (Bug Hunting)</li>
                     </ul>
-                    </div>
-        </div>
-            </div>
-            <div class="col">
-           <div class="card  glass-card h-100" >
-             <div class="card-header text-center fw-bold">       
-                     Networks
-             </div>
-            <img src="img/nw.jpeg" class="card-img-top p-2" >
-                          <div class="card-body">
-                    CCNA: Overall knowledge and fundamental networking skills.
-                          </div>
+                </div>
             </div>
         </div>
-           
-               <div class="col">
-           <div class="card glass-card h-100" >
-             <div class="card-header text-center fw-bold">           
-                            Programming
-             </div>
-            <img src="img/pg.jpeg" class="card-img-top p-2" >
-                    <div class="card-body">
-                    <ul class="small ps-3">
-                        <li> Python
-                        </li>
-                        <li>
-                       Web: HTML/CSS/JS/BS
-                            </li>
-                            <li>
-                                DB : Mysql
-                            </li>
+
+        <div class="col">
+            <div class="card glass-card h-100 border-0">
+                <div class="card-header text-center fw-bold tech-font">Networks</div>
+                <img src="img/nw.jpeg" class="card-img-top" alt="Networks">
+                <div class="card-body">
+                    <p class="small text-muted mb-0">CCNA: Overall knowledge and fundamental networking skills.</p>
+                </div>
+            </div>
+        </div>
+       
+        <div class="col">
+            <div class="card glass-card h-100 border-0">
+                <div class="card-header text-center fw-bold tech-font">Programming</div>
+                <img src="img/pg.jpeg" class="card-img-top" alt="Programming">
+                <div class="card-body">
+                    <ul class="small ps-3 text-muted mb-0">
+                        <li>Python</li>
+                        <li>Web: HTML/CSS/JS/BS</li>
+                        <li>DB: MySQL</li>
                     </ul>
-                  </div>
-                        
+                </div>
             </div>
-            </div>
-                <div class="col">
-           <div class="card glass-card h-100" >
-             <div class="card-header text-center fw-bold">            
-                            Operating Systems
-
-             </div>
-            <img src="img/op.jpeg" class="card-img-top p-2" >
-            <div class="card-body">
-             <ul class="small ps-3">
-                <li>
-                    Linux (Daily Driver)
-                </li>
-                <li>Windows Administration </li>
-
-             </ul>
-             </div>
-            </div>
-            </div>
-    
-    
         </div>
-        <h2 class="  text-center MB-5 pt-3 border-bottom pb-3" style="color: chocolate;" >My Socail and platforms </h2>
-        <div class="row  justify-content-center">
-          <div class="col-12 text-center">
-          
-<iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=2328855" 
-style="border:none; width: 400px; height: 100px; overflow: hidden;" 
-class="mx-auto d-block mt-3"></iframe>
-     
-</div>
-</div>
-</div>
- 
-      <footer class="text-center py-5 mt-5 text-muted small">
-    &copy; 2025 Mzodkn Portfolio | Built with Bootstrap
+
+        <div class="col">
+            <div class="card glass-card h-100 border-0">
+                <div class="card-header text-center fw-bold tech-font">Operating Systems</div>
+                <img src="img/op.jpeg" class="card-img-top" alt="Operating Systems">
+                <div class="card-body">
+                    <ul class="small ps-3 text-muted mb-0">
+                        <li>Linux (Daily Driver) Using Arch BTW</li>
+                        <li>Windows Administration</li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+  </div>
+
+  <div id="projects" class="container mt-4 pt-2">
+    <h2 class="text-center mb-4 pt-3 border-bottom border-secondary pb-3 tech-font text-accent">PROJECTS & WRITEUPS</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-10 text-center">
+            <div class="glass-card p-5 border-dashed">
+                <h4 class="tech-font text-white mb-3">Coming Soon _</h4>
+                <p class="text-muted mb-0">CTF Writeups, automated scripts, and personal cybersecurity projects will be displayed here.</p>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="container mt-5 pt-4">
+    <h2 class="text-center mb-4 pt-3 border-bottom border-secondary pb-3 tech-font text-accent">MY SOCIALS & PLATFORMS</h2>
+    <div class="row justify-content-center">
+        <div class="col-12 d-flex flex-wrap justify-content-center align-items-center gap-4">
+            <!-- TryHackMe -->
+            <div class="glass-card p-3 d-flex align-items-center justify-content-center" style="min-width: 320px; overflow-x: auto;">
+                <iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=2328855" 
+                style="border:none; width: 400px; height: 100px; max-width: 100%;" 
+                class="mx-auto d-block"></iframe>
+            </div>
+            
+            <!-- Certified Thinker -->
+            <div class="glass-card p-3 d-flex align-items-center justify-content-center" style="min-width: 320px; height: 132px;">
+                <a href="https://meatproxy.me/c/q8hqr" target="_blank" rel="noopener">
+                    <img src="https://meatproxy.me/badge/c/q8hqr.svg" alt="Certified Thinker" height="40" />
+                </a>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <section id="contact" class="container mt-5 pt-4">
+    <h2 class="text-center mb-4 pt-3 border-bottom border-secondary pb-3 tech-font text-accent">CONTACT</h2>
+    <div class="glass-card p-5 text-center col-md-8 mx-auto border-dashed">
+        <p class="text-muted mb-4">Feel free to reach out for collaborations or just a friendly chat.</p>
+        <a href="https://github.com/Mzodkn" class="btn m-2" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); transition: 0.3s;" target="_blank" rel="noopener" onmouseover="this.style.background='var(--accent-glow)'" onmouseout="this.style.background='transparent'">GitHub</a>
+        <a href="https://www.linkedin.com/in/moaz-yasir-69a819283" class="btn m-2" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); transition: 0.3s;" target="_blank" rel="noopener" onmouseover="this.style.background='var(--accent-glow)'" onmouseout="this.style.background='transparent'">LinkedIn</a>
+    </div>
+  </section>
+
+  <footer class="text-center py-4 mt-5 text-muted small tech-font border-top border-secondary" style="border-opacity: 0.2;">
+    &copy; Moz <span class="text-accent">moz@mzodkn:~#</span>
   </footer>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

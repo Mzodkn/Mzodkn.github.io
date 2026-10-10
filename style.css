@@ -1,0 +1,185 @@
+        :root {
+      
+            --bg-start: #111827; 
+            --bg-end: #1f2937;   
+            --accent: #10b981; 
+            --accent-glow: rgba(16, 185, 129, 0.2);
+            --text-main: #f9fafb; 
+            --text-muted: #cbd5e1; 
+        }
+
+        html {
+            background-color: var(--bg-end); 
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            background-attachment: fixed; 
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            position: relative;
+            font-size: 1.1rem; 
+            line-height: 1.6;  
+            min-height: 100vh; 
+            margin: 0;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        h1, h2, h3, h4, .navbar-brand, .tech-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .text-accent { color: var(--accent) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main) !important;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden; 
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 15px var(--accent-glow);
+        }
+        
+        .border-dashed { border: 1px dashed rgba(255,255,255,0.2) !important; }
+        .card-header { background: transparent; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--accent); }
+
+        .card-img-top {
+            height: 160px; 
+            object-fit: cover; 
+            padding: 0.5rem;
+            border-radius: 12px;
+        }
+
+        .navbar {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        .navbar-brand { color: var(--accent) !important; font-weight: bold; font-size: 1.5rem; }
+        .nav-link { color: var(--text-muted) !important; font-family: 'JetBrains Mono', monospace; }
+        .nav-link:hover { color: var(--accent) !important; }
+        .nav-link.active { color: var(--accent) !important; border-bottom: 2px solid var(--accent); }
+
+        .profile-wrapper { position: relative; display: inline-block; }
+        .profile-wrapper::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 110%; height: 110%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+            z-index: -1; border-radius: 50%;
+        }
+        .profile-img {
+            border-radius: 20px !important;
+            border: 2px solid var(--accent);
+            z-index: 1; position: relative;
+            max-width: 80%; 
+        }
+        .custom-badge {
+            background-color: var(--accent-glow);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 38px; 
+            white-space: nowrap;
+        }
+
+
+/* ----Terminal-------- */
+        
+        .cmd-1 {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 0;
+            border-right: 2px solid transparent; 
+            animation: type-cmd-1 2s steps(20, end) 0.5s forwards;
+            vertical-align: bottom;
+        }
+
+        .output-1 {
+            opacity: 0;
+            animation: show-output-1 0s 2.6s forwards; 
+        }
+
+ 
+        .cmd-2-loop {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--accent);
+            width: 0;
+            animation: typing-loop 8s steps(20, end) 5s infinite, blink-caret .75s step-end infinite;
+            vertical-align: bottom;
+        }
+
+        .output-2-loop {
+            opacity: 0;
+            animation: output-loop 8s 5s infinite;
+        }
+
+        .final-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1em;
+            background-color: var(--accent);
+            vertical-align: middle;
+            margin-left: 8px;
+            animation: blink-final 1s infinite;
+        }
+
+        /* ----- Keyframes ----- */
+        @keyframes type-cmd-1 {
+            0% { width: 0; border-right-color: var(--accent); }
+            99% { width: 100%; border-right-color: var(--accent); }
+            100% { width: 100%; border-right-color: transparent; }
+        }
+        
+        @keyframes show-output-1 {
+            to { opacity: 1; }
+        }
+
+        @keyframes typing-loop {
+            0%, 15%   { width: 0; }           
+            35%, 65%  { width: 100%; }        
+            85%, 100% { width: 0; }           
+        }
+
+        @keyframes output-loop {
+            0%, 35% { opacity: 0; }           
+            35.1%, 65% { opacity: 1; }        
+            65.1%, 100% { opacity: 0; }       
+        }
+
+        @keyframes blink-final {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        @media (max-width: 768px) {
+            .typing-effect { font-size: 0.85rem; }
+            body { font-size: 1rem; } 
+            .glass-card { padding: 1rem !important; } 
+            .card-img-top { height: 130px; } 
+        }
