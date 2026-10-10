@@ -51,6 +51,13 @@
         <button id="sidebarToggle" class="p-2 md:hidden text-dark-muted hover:text-white">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
         </button>
+        
+        <!-- زر الرجوع للقائمة الرئيسية -->
+        <a href="index.html" class="px-3 py-1.5 rounded-lg bg-dark-elevated border border-dark-border text-xs sm:text-sm font-bold text-dark-muted hover:text-white hover:bg-dark-border transition flex items-center gap-1.5 shadow-sm shrink-0" title="الرئيسية">
+            <span>&larr;</span> <span class="hidden sm:inline">الرئيسية</span>
+        </a>
+        <div class="h-5 w-[1px] bg-dark-border shrink-0"></div>
+
         <div class="w-9 h-9 rounded bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center font-bold text-white">TE</div>
         <div class="font-bold text-lg hidden sm:block">Technical English II</div>
       </div>
@@ -659,7 +666,7 @@
     ];
 
     // ================= APP ENGINE =================
-    let currentLang = 'ar'; // Default language
+    let currentLang = 'ar';
     let currentIndex = 0;
 
     const moduleList = document.getElementById('moduleList');
@@ -697,7 +704,6 @@
       lectureNumber.textContent = `${data.number}`;
       contentArea.innerHTML = data.content[currentLang];
       
-      // Handle Quiz Render
       if (data.quiz) {
         quizSection.style.display = 'block';
         const qData = data.quiz;
@@ -709,7 +715,7 @@
           btn.innerHTML = `<span>${opt}</span><span class="w-4 h-4 rounded-full border border-dark-border"></span>`;
           
           btn.onclick = () => {
-            Array.from(quizContainer.children).forEach(c => c.disabled = true); // lock answers
+            Array.from(quizContainer.children).forEach(c => c.disabled = true);
             
             if (idx === qData.answer) {
               btn.classList.add('border-green-500', 'bg-green-500/10', 'text-green-400');
@@ -720,7 +726,6 @@
               const icon = btn.querySelector('span:last-child');
               icon.outerHTML = `<span class="text-red-400 text-lg">✖</span>`;
               
-              // highlight correct
               const correctBtn = quizContainer.children[qData.answer + 1];
               correctBtn.classList.add('border-green-500', 'bg-green-500/10', 'text-green-400');
               correctBtn.querySelector('span:last-child').outerHTML = `<span class="text-green-400 text-lg">✔</span>`;
@@ -729,10 +734,9 @@
           quizContainer.appendChild(btn);
         });
       } else {
-        quizSection.style.display = 'none'; // hide quiz if none exists (like in glossary)
+        quizSection.style.display = 'none';
       }
 
-      // Handle Buttons State
       prevBtn.style.opacity = currentIndex === 0 ? '0.4' : '1';
       prevBtn.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
       
@@ -754,7 +758,6 @@
       renderContent();
     }
 
-    // ================= EVENTS =================
     langToggle.onclick = () => { 
       currentLang = currentLang === 'ar' ? 'en' : 'ar'; 
       renderAll(); 
@@ -780,7 +783,6 @@
       sidebar.classList.toggle('hidden');
     };
 
-    // Initialize the app
     renderAll();
   </script>
 </body>

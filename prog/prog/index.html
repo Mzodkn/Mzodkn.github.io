@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UGC - Semester 2 Portal</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bg: { base: '#0f172a', surface: '#1e293b', elevated: '#334155' },
+                        border: { subtle: '#334155', strong: '#475569' },
+                        text: { primary: '#f8fafc', secondary: '#cbd5e1', muted: '#94a3b8' },
+                        accent: { blue: '#38bdf8', violet: '#a78bfa', teal: '#14b8a6' },
+                        status: { warning: '#fbbf24' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Cairo', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        body[dir="rtl"] { font-family: 'Cairo', 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+        /* Card Hover Effects for Active Courses */
+        .active-card {
+            transition: all 0.3s ease;
+            border: 1px solid #334155;
+        }
+        .active-card:hover {
+            transform: translateY(-5px);
+            border-color: #38bdf8;
+            box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Styling for Under Construction Cards */
+        .pending-card {
+            border: 1px dashed #475569;
+            background: rgba(30, 41, 59, 0.5);
+            transition: all 0.3s ease;
+            cursor: not-allowed;
+        }
+        .pending-card:hover {
+            border-color: #fbbf24;
+            background: rgba(30, 41, 59, 0.8);
+        }
+        .pending-img {
+            filter: grayscale(80%) opacity(0.8);
+            transition: all 0.3s ease;
+        }
+        .pending-card:hover .pending-img {
+            filter: grayscale(0%) opacity(1);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-bg-base text-text-primary min-h-screen flex flex-col">
+
+    <!-- Global Header -->
+    <header class="h-16 bg-bg-base/95 backdrop-blur border-b border-border-subtle flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-accent-blue to-accent-teal flex items-center justify-center font-bold text-white shadow-lg text-sm tracking-wider">UGC</div>
+            <div class="font-bold text-text-primary text-lg leading-tight" data-i18n="header_title">Semester 2 Portal</div>
+        </div>
+        
+        <button onclick="switchLanguage(currentLang === 'en' ? 'ar' : 'en')" class="px-4 py-1.5 rounded-lg bg-bg-elevated border border-border-strong text-sm font-bold text-text-primary hover:bg-border-subtle transition shadow-md flex items-center gap-2">
+            <span id="langBtnText">العربية</span> 🌐
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        
+        <div class="text-center max-w-3xl mx-auto mb-12">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight" data-i18n="hero_title">Study Materials Hub</h1>
+            <p class="text-lg text-text-secondary" data-i18n="hero_subtitle">Select a subject below to access interactive lectures, summaries, and self-assessment quizzes.</p>
+        </div>
+
+        <!-- Courses Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+            <!-- 1. Discrete Mathematics (Active) -->
+            <a href="math.html" class="active-card bg-bg-surface rounded-xl p-6 flex flex-col h-full group relative overflow-hidden block text-left" dir="auto">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-accent-violet/10 rounded-bl-full -z-10 transition group-hover:scale-150"></div>
+                <div class="w-12 h-12 rounded-lg bg-bg-base border border-border-strong flex items-center justify-center text-2xl mb-4 shadow-sm">🧠</div>
+                <div class="flex-1">
+                    <span class="inline-block px-2.5 py-1 bg-status-success/10 text-status-success text-[10px] font-bold rounded-full mb-2 uppercase tracking-wide" data-i18n="badge_ready">Available</span>
+                    <h3 class="text-xl font-bold text-text-primary mb-2" data-i18n="c1_title">Discrete Mathematics</h3>
+                    <p class="text-sm text-text-secondary leading-relaxed" data-i18n="c1_desc">Logic, sets, functions, Boolean algebra, and induction.</p>
+                </div>
+                <div class="mt-6 pt-4 border-t border-border-subtle font-semibold text-accent-blue text-sm flex items-center justify-between group-hover:text-accent-teal">
+                    <span data-i18n="btn_enter">Enter Course</span>
+                    <span class="transform group-hover:translate-x-1 transition" dir="ltr">&rarr;</span>
+                </div>
+            </a>
+
+            <!-- 2. Technical English II (Active) -->
+            <a href="eng.html" class="active-card bg-bg-surface rounded-xl p-6 flex flex-col h-full group relative overflow-hidden block text-left" dir="auto">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-accent-blue/10 rounded-bl-full -z-10 transition group-hover:scale-150"></div>
+                <div class="w-12 h-12 rounded-lg bg-bg-base border border-border-strong flex items-center justify-center text-2xl mb-4 shadow-sm">📘</div>
+                <div class="flex-1">
+                    <span class="inline-block px-2.5 py-1 bg-status-success/10 text-status-success text-[10px] font-bold rounded-full mb-2 uppercase tracking-wide" data-i18n="badge_ready">Available</span>
+                    <h3 class="text-xl font-bold text-text-primary mb-2" data-i18n="c2_title">Technical English II</h3>
+                    <p class="text-sm text-text-secondary leading-relaxed" data-i18n="c2_desc">Technical writing, grammar, note-making, and software documentation.</p>
+                </div>
+                <div class="mt-6 pt-4 border-t border-border-subtle font-semibold text-accent-blue text-sm flex items-center justify-between group-hover:text-accent-teal">
+                    <span data-i18n="btn_enter">Enter Course</span>
+                    <span class="transform group-hover:translate-x-1 transition" dir="ltr">&rarr;</span>
+                </div>
+            </a>
+
+            <!-- 3. Subject 3 (Under Construction) -->
+            <div class="pending-card rounded-xl p-6 flex flex-col h-full items-center justify-center text-center relative overflow-hidden">
+                <img src="hehe.png" alt="Under Construction" class="w-24 h-24 object-contain mb-4 pending-img drop-shadow-md">
+                <h3 class="text-lg font-bold text-text-muted mb-1" data-i18n="c3_title">Programming II</h3>
+                <p class="text-xs font-bold text-status-warning bg-status-warning/10 px-3 py-1 rounded-full mt-2" data-i18n="badge_pending">Under Construction</p>
+            </div>
+
+            <!-- 4. Subject 4 (Under Construction) -->
+            <div class="pending-card rounded-xl p-6 flex flex-col h-full items-center justify-center text-center relative overflow-hidden">
+                <img src="hehe.png" alt="Under Construction" class="w-24 h-24 object-contain mb-4 pending-img drop-shadow-md">
+                <h3 class="text-lg font-bold text-text-muted mb-1" data-i18n="c4_title">Computer Architecture</h3>
+                <p class="text-xs font-bold text-status-warning bg-status-warning/10 px-3 py-1 rounded-full mt-2" data-i18n="badge_pending">Under Construction</p>
+            </div>
+
+            <!-- 5. Subject 5 (Under Construction) -->
+            <div class="pending-card rounded-xl p-6 flex flex-col h-full items-center justify-center text-center relative overflow-hidden">
+                <img src="hehe.png" alt="Under Construction" class="w-24 h-24 object-contain mb-4 pending-img drop-shadow-md">
+                <h3 class="text-lg font-bold text-text-muted mb-1" data-i18n="c5_title">Calculus & Math</h3>
+                <p class="text-xs font-bold text-status-warning bg-status-warning/10 px-3 py-1 rounded-full mt-2" data-i18n="badge_pending">Under Construction</p>
+            </div>
+
+            <!-- 6. Subject 6 (Under Construction) -->
+            <div class="pending-card rounded-xl p-6 flex flex-col h-full items-center justify-center text-center relative overflow-hidden">
+                <img src="hehe.png" alt="Under Construction" class="w-24 h-24 object-contain mb-4 pending-img drop-shadow-md">
+                <h3 class="text-lg font-bold text-text-muted mb-1" data-i18n="c6_title">Economics</h3>
+                <p class="text-xs font-bold text-status-warning bg-status-warning/10 px-3 py-1 rounded-full mt-2" data-i18n="badge_pending">Under Construction</p>
+            </div>
+
+            <!-- 7. Subject 7 (Under Construction) -->
+            <div class="pending-card rounded-xl p-6 flex flex-col h-full items-center justify-center text-center relative overflow-hidden">
+                <img src="hehe.png" alt="Under Construction" class="w-24 h-24 object-contain mb-4 pending-img drop-shadow-md">
+                <h3 class="text-lg font-bold text-text-muted mb-1" data-i18n="c7_title">Communication Skills</h3>
+                <p class="text-xs font-bold text-status-warning bg-status-warning/10 px-3 py-1 rounded-full mt-2" data-i18n="badge_pending">Under Construction</p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-border-subtle bg-bg-base/80 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 py-6 text-center text-sm text-text-muted">
+            <p data-i18n="footer_text">UGC Semester 2 Study Portal © 2026. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // =========================================================================
+        // DICTIONARY FOR EN/AR TRANSLATION
+        // =========================================================================
+        const dict = {
+            en: {
+                header_title: "Semester 2 Portal",
+                hero_title: "Study Materials Hub",
+                hero_subtitle: "Select a subject below to access interactive lectures, summaries, and self-assessment quizzes.",
+                badge_ready: "Available",
+                badge_pending: "Under Construction",
+                btn_enter: "Enter Course",
+                c1_title: "Discrete Mathematics",
+                c1_desc: "Logic, sets, functions, Boolean algebra, and mathematical induction.",
+                c2_title: "Technical English II",
+                c2_desc: "Technical writing, grammar, note-making, and software documentation.",
+                c3_title: "Economy",
+                c4_title: "Computer Fundamentals",
+                c5_title: "Program",
+                c6_title: "IS",
+                c7_title: "Communication Skills؟؟",
+                footer_text: " Semester 2"
+            },
+            ar: {
+                header_title: "بوابة الفصل الثاني",
+                hero_title: "منصة المقررات الدراسية",
+                hero_subtitle: "اختر المادة من الأسفل | ممكن توجه او تلاقي محتوي ما موجود    .",
+                badge_ready: "متاح الآن",
+                badge_pending: "جاري العمل",
+                btn_enter: "دخول المقرر",
+                c1_title: "الرياضيات المتقطعة",
+                c1_desc: "المنطق، المجموعات، الدوال، الجبر البولياني، والاستقراء الرياضي.",
+                c2_title: "الإنجليزية التقنية II",
+                c2_desc: "الكتابة التقنية، قواعد اللغة، تدوين الملاحظات، وتوثيق البرمجيات.",
+                c3_title: " مبادئ اقتصاد ",
+                c4_title: "أساسيات الحاسوب",
+                c5_title: "برمجة",
+                c6_title: " انظمة ؟  IS",
+                c7_title: "مهارات التواصل ؟ ماعارف والله",
+                footer_text: " وبالتوفيق "
+            }
+        };
+
+        let currentLang = 'ar'; // Default language
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // Update Toggle Button Text
+            document.getElementById('langBtnText').textContent = lang === 'en' ? 'عربي' : 'English';
+            
+            // Update Content dynamically based on data-i18n attributes
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(dict[lang][key]) {
+                    el.textContent = dict[lang][key];
+                }
+            });
+
+            // Adjust text alignment for blocks with dir="auto"
+            document.querySelectorAll('[dir="auto"]').forEach(el => {
+                el.style.textAlign = lang === 'ar' ? 'right' : 'left';
+            });
+        }
+
+        // Initialize Page
+        document.addEventListener('DOMContentLoaded', () => {
+            switchLanguage('ar'); // Start in Arabic by default
+        });
+    </script>
+</body>
+</html>
